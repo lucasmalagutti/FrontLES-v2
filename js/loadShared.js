@@ -65,4 +65,32 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Erro ao carregar modals/_chatModal.html:', error));
 
+    // Carregar o modal de adicionar endereço
+    fetch('modals/pagAdm/_addEnderecoModal.html')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const addEnderecoModalDoc = parser.parseFromString(data, 'text/html');
+            const addEnderecoModalContent = addEnderecoModalDoc.querySelector('#addEnderecoModal');
+
+            if (addEnderecoModalContent) {
+                document.body.appendChild(addEnderecoModalContent);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar modals/pagAdm/_addEnderecoModal.html:', error));
+
+    // Carregar o modal de adicionar cartão
+    fetch('modals/pagAdm/_addCartaoModal.html')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const addCartaoModalDoc = parser.parseFromString(data, 'text/html');
+            const addCartaoModalContent = addCartaoModalDoc.querySelector('#addCartaoModal');
+
+            if (addCartaoModalContent) {
+                document.body.appendChild(addCartaoModalContent);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar modals/pagAdm/_addCartaoModal.html:', error));
+
 });

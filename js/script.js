@@ -32,7 +32,11 @@ function showAlert(message, type) {
     }, 5000);
 }
 
-let cart = [];
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+function saveCartToLocalStorage() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+}
 
 function updateCartCount() {
     const cartCountSpan = document.getElementById('cart-count');
@@ -83,12 +87,14 @@ function renderCart() {
         }
         updateCartTotal();
         updateCartCount();
+        saveCartToLocalStorage();
     }
 }
 
 function initializeCartFunctionality() {
     const cartItemsContainer = document.getElementById('cart-items-container');
     const clearCartBtn = document.getElementById('clear-cart-btn');
+    const checkoutBtn = document.getElementById('checkout-btn');
 
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', (event) => {
@@ -181,6 +187,18 @@ function initializeCartFunctionality() {
             renderCart();
         });
     }
+
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length > 0) {
+                saveCartToLocalStorage(); // Salva o carrinho antes de redirecionar
+                window.location.href = 'checkout.html';
+            } else {
+                showAlert('Seu carrinho está vazio!', 'warning');
+            }
+        });
+    }
+
     renderCart();
 }
 
@@ -296,4 +314,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Verificar parâmetros da URL para exibir mensagens de notificação
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderStatus = urlParams.get('order');
+
+    if (orderStatus === 'success') {
+        showAlert('Compra efetuada com sucesso!', 'success');
+        // Remover o parâmetro da URL para que a mensagem não apareça novamente ao recarregar a página
+        history.replaceState(null, '', window.location.pathname);
+    } else if (orderStatus === 'cancelled') {
+        showAlert('Pedido cancelado.', 'info');
+        // Remover o parâmetro da URL
+        history.replaceState(null, '', window.location.pathname);
+    }
 });
