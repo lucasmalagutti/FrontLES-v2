@@ -73,3 +73,11 @@
     background: transparent;
     padding: 10px;
 }
+
+/* Estilo específico para a bola de basquete */
+.product-card img[src*="bolaBasquete"] {
+    height: 250px !important;
+    object-fit: contain !important;
+    background: transparent;
+    padding: 10px;
+}
