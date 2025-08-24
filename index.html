@@ -27,20 +27,18 @@
                             <a class="nav-link active" aria-current="page" href="#">Início</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Futebol</a>
+                            <a class="nav-link" href="futebol.html">Futebol</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Basquete</a>
+                            <a class="nav-link" href="basquete.html">Basquete</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Contato</a>
-                        </li>
+
                     </ul>
-                    <form class="d-flex me-3">
-                        <input class="form-control me-2" type="search" placeholder="Buscar produtos..."
+                    <form class="d-flex me-3" onsubmit="return realizarBusca(event)">
+                        <input class="form-control me-2" type="search" placeholder="Buscar produtos..." id="searchInput"
                             aria-label="Search">
                         <button class="btn btn-outline-light" type="submit">Buscar</button>
-                        <a href="#" class="btn btn-outline-light ms-2">Login</a>
+                        <button type="button" class="btn btn-outline-light ms-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
                         <a href="FormCliente.html" class="btn btn-outline-light ms-2">Cadastrar</a>
                     </form>
                     <ul class="navbar-nav">
@@ -70,7 +68,7 @@
             <p class="text-muted">Confira nossa seleção especial para você</p>
         </section>
 
-        <section class="mb-5">
+        <section class="mb-5" id="futebol">
             <h3 class="fw-bold border-bottom pb-2 mb-4">Futebol</h3>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
                 <div class="col">
@@ -124,7 +122,7 @@
             </div>
         </section>
 
-        <section>
+        <section id="basquete">
             <h3 class="fw-bold border-bottom pb-2 mb-4">Basquete</h3>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
                 <div class="col">
@@ -179,6 +177,45 @@
         </section>
     </div>
 
+    <!-- Modal de Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                                 <div class="modal-header bg-dark text-white">
+                     <h5 class="modal-title" id="loginModalLabel">
+                         <i class="bi bi-person-circle me-2"></i>Login
+                     </h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                 </div>
+                <div class="modal-body">
+                    <form id="loginForm" onsubmit="return realizarLogin(event)">
+                                                 <div class="mb-3">
+                             <label for="loginUsuario" class="form-label">CPF</label>
+                             <input type="text" class="form-control" id="loginUsuario" name="loginUsuario" 
+                                    placeholder="Digite seu CPF" required>
+                         </div>
+                        <div class="mb-3">
+                            <label for="loginSenha" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="loginSenha" name="loginSenha" 
+                                   placeholder="Digite sua senha" required>
+                        </div>
+
+                                                 <div class="d-grid">
+                             <button type="submit" class="btn btn-dark">
+                                 <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                             </button>
+                         </div>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <p class="mb-0">Não tem uma conta? 
+                        <a href="FormCliente.html" class="text-decoration-none">Cadastre-se</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="bg-dark text-white pt-5 pb-4">
         <div class="container text-center text-md-start">
             <div class="row text-center text-md-start">
@@ -210,6 +247,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    <script src="busca.js"></script>
+    <script src="login.js"></script>
 </body>
 
 </html>
