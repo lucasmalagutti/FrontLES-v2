@@ -66,13 +66,17 @@ function renderizarProdutos(produtosParaExibir) {
                                 <span class="mx-2 product-quantity-display" data-product-id="${produto.id}">1</span>
                                 <button class="btn btn-sm btn-outline-secondary increase-product-quantity" data-product-id="${produto.id}">+</button>
                             </div>
-                        <a href="#" class="btn btn-comprar w-100 add-to-cart">Comprar</a>
+                        <a href="#" class="btn btn-comprar w-100 add-to-cart" data-product-id="${produto.id}" data-product-name="${produto.nome}" data-product-price="${produto.preco}" data-product-image="${produto.imagem}">Comprar</a>
                     </div>
                 </div>
             </div>
         `;
         productsGrid.innerHTML += produtoHTML;
     });
+
+    if (typeof initializeCartFunctionality === 'function') {
+        initializeCartFunctionality();
+    }
 }
 
 function buscarEmTempoReal(termo) {

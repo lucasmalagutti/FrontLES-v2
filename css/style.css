@@ -203,3 +203,65 @@ body {
     background-color: #212529 !important;
     border-color: #212529 !important;
 }
+
+/* Estilos específicos para a página de resultados de busca */
+body {
+    padding-top: 70px; /* Espaçamento para a navbar fixa */
+}
+
+/* Container principal da página de busca */
+.container.my-5 {
+    margin-top: 100px !important; /* Espaçamento extra para evitar corte pela navbar */
+    margin-bottom: 50px !important;
+}
+
+/* Estilos para os cards dos produtos na busca */
+#resultsContainer .product-card {
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#resultsContainer .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+#resultsContainer .product-card .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#resultsContainer .product-card .card-text {
+    flex-grow: 1;
+    margin-bottom: 1rem;
+}
+
+#resultsContainer .product-card .btn-comprar {
+    margin-top: auto; /* Empurra o botão para baixo */
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+    .container.my-5 {
+        margin-top: 80px !important;
+        margin-bottom: 30px !important;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    #resultsContainer .product-card .card-img-top {
+        height: 180px;
+    }
+    
+    #resultsContainer .product-card img[src*="bolaNike"],
+    #resultsContainer .product-card img[src*="cones"],
+    #resultsContainer .product-card img[src*="rede"],
+    #resultsContainer .product-card img[src*="bandeira"],
+    #resultsContainer .product-card img[src*="bolaBasquete"],
+    #resultsContainer .product-card img[src*="tabela"],
+    #resultsContainer .product-card img[src*="aro"],
+    #resultsContainer .product-card img[src*="retornador"] {
+        height: 200px !important;
+    }
+}
