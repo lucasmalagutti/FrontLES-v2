@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="profile-main container my-5">
+        <section class="profile-section card p-4 shadow-sm">
+            <h1 class="mb-4 text-center">Meu Perfil</h1>
+
+            <div class="profile-details row g-4">
+                <!-- Dados Pessoais -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0">Dados Pessoais</h2>
+                            <button id="edit-personal-data-btn" class="btn btn-sm btn-outline-primary">Editar Dados</button>
+                        </div>
+                        <div class="card-body" id="personal-data-container">
+                            <!-- Dados pessoais serão carregados aqui -->
+                            <p>Nome: <span id="profile-name"></span></p>
+                            <p>Email: <span id="profile-email"></span></p>
+                            <p>Gênero: <span id="profile-gender"></span></p>
+                            <p>CPF: <span id="profile-cpf"></span></p>
+                            <p>Telefone: <span id="profile-phone"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereços Salvos -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0">Endereços Salvos</h2>
+                            <button id="add-new-address-btn" class="btn btn-sm btn-outline-success">Adicionar Novo Endereço</button>
+                        </div>
+                        <div class="card-body" id="saved-addresses-container">
+                            <!-- Endereços salvos serão carregados aqui -->
+                            <p class="text-muted">Nenhum endereço salvo.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cartões de Crédito Salvos -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0">Cartões de Crédito Salvos</h2>
+                            <button id="add-new-card-btn" class="btn btn-sm btn-outline-success">Adicionar Novo Cartão</button>
+                        </div>
+                        <div class="card-body" id="saved-cards-container">
+                            <!-- Cartões salvos serão carregados aqui -->
+                            <p class="text-muted">Nenhum cartão salvo.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Senha -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0">Senha</h2>
+                            <button id="edit-password-btn" class="btn btn-sm btn-outline-primary">Editar Senha</button>
+                        </div>
+                        <div class="card-body">
+                            <p>********</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/loadShared.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script> <!-- Novo arquivo JS para a lógica do perfil -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

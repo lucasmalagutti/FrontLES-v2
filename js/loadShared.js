@@ -93,4 +93,60 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Erro ao carregar modals/pagAdm/_addCartaoModal.html:', error));
 
+    // Carregar o modal de editar dados do cliente
+    fetch('modals/pagAdm/_editarDadosModal.html')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const editarDadosModalDoc = parser.parseFromString(data, 'text/html');
+            const editarDadosModalContent = editarDadosModalDoc.querySelector('#editarDadosModal');
+
+            if (editarDadosModalContent) {
+                document.body.appendChild(editarDadosModalContent);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar modals/pagAdm/_editarDadosModal.html:', error));
+
+    // Carregar o modal de endereços
+    fetch('modals/pagAdm/_enderecosModal.html')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const enderecosModalDoc = parser.parseFromString(data, 'text/html');
+            const enderecosModalContent = enderecosModalDoc.querySelector('#enderecosModal');
+
+            if (enderecosModalContent) {
+                document.body.appendChild(enderecosModalContent);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar modals/pagAdm/_enderecosModal.html:', error));
+
+    // Carregar o modal de cartões
+    fetch('modals/pagAdm/_cartoesModal.html')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const cartoesModalDoc = parser.parseFromString(data, 'text/html');
+            const cartoesModalContent = cartoesModalDoc.querySelector('#cartoesModal');
+
+            if (cartoesModalContent) {
+                document.body.appendChild(cartoesModalContent);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar modals/pagAdm/_cartoesModal.html:', error));
+
+    // Carregar o modal de editar senha
+    fetch('modals/pagAdm/_editarSenhaModal.html')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const editarSenhaModalDoc = parser.parseFromString(data, 'text/html');
+            const editarSenhaModalContent = editarSenhaModalDoc.querySelector('#editarSenhaModal');
+
+            if (editarSenhaModalContent) {
+                document.body.appendChild(editarSenhaModalContent);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar modals/pagAdm/_editarSenhaModal.html:', error));
+
 });
