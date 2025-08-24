@@ -61,8 +61,12 @@
                             <button id="edit-password-btn" class="btn btn-sm btn-outline-primary">Editar Senha</button>
                         </div>
                         <div class="card-body">
-                            <p>********</p>
-                        </div>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="senhaPerfil" value="senha123" readonly>
+                                <button class="btn btn-outline-secondary" type="button" id="toggleSenhaPerfil">
+                                    <i class="bi bi-eye" id="iconSenhaPerfil"></i>
+                                </button>
+
                     </div>
                 </div>
             </div>
@@ -72,6 +76,7 @@
     <script src="js/loadShared.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/passwordToggle.js"></script> <!-- Funcionalidade de mostrar/ocultar senha -->
     <script src="js/profile.js"></script> <!-- Novo arquivo JS para a lógica do perfil -->
 </body>
 </html>

@@ -12,6 +12,8 @@ document.addEventListener('sharedContentLoaded', () => {
 
     let selectedAddress = null;
     let selectedCard = null;
+    let appliedCoupon = null;
+    let couponDiscount = 0;
 
     const savedAddressesContainer = document.getElementById('saved-addresses');
     const addAddressBtn = document.getElementById('add-address-btn');
@@ -23,6 +25,42 @@ document.addEventListener('sharedContentLoaded', () => {
     const totalAmountSpan = document.getElementById('total-amount');
     const placeOrderBtn = document.getElementById('place-order-btn');
     const cancelOrderBtn = document.getElementById('cancel-order-btn');
+
+    // Função para calcular o total considerando frete e cupom
+    function calculateTotal() {
+        let subtotal = 0;
+        let shippingCost = 10.00; // Valor fixo do frete
+        
+        // Calcular subtotal dos produtos
+        cart.forEach(item => {
+            subtotal += item.price * item.quantity;
+        });
+        
+        // Aplicar desconto do cupom (se houver)
+        let discountAmount = 0;
+        let subtotalWithDiscount = subtotal;
+        
+        if (appliedCoupon && appliedCoupon !== 'FRETEZERO') {
+            discountAmount = subtotal * (couponDiscount / 100);
+            subtotalWithDiscount = subtotal - discountAmount;
+        }
+        
+        // Aplicar cupom de frete grátis
+        if (appliedCoupon === 'FRETEZERO') {
+            shippingCost = 0;
+        }
+        
+        // Calcular total final (subtotal com desconto + frete)
+        const total = subtotalWithDiscount + shippingCost;
+        
+        return {
+            subtotal: subtotal,
+            subtotalWithDiscount: subtotalWithDiscount,
+            discountAmount: discountAmount,
+            shippingCost: shippingCost,
+            total: total
+        };
+    }
 
     function renderAddresses() {
         if (savedAddresses.length === 0) {
@@ -72,7 +110,7 @@ document.addEventListener('sharedContentLoaded', () => {
 
     function renderOrderSummary() {
         orderItemsContainer.innerHTML = '';
-        let total = 0;
+        
         if (cart.length === 0) {
             const emptyItem = document.createElement('li');
             emptyItem.classList.add('list-group-item', 'text-muted');
@@ -87,10 +125,58 @@ document.addEventListener('sharedContentLoaded', () => {
                     <span>R$ ${(item.price * item.quantity).toFixed(2)}</span>
                 `;
                 orderItemsContainer.appendChild(itemLi);
-                total += item.price * item.quantity;
             });
         }
-        totalAmountSpan.textContent = `R$ ${total.toFixed(2)}`;
+        
+        // Calcular totais usando a nova função
+        const totals = calculateTotal();
+        
+        // Atualizar o valor do frete
+        const shippingCostSpan = document.getElementById('shipping-cost');
+        if (shippingCostSpan) {
+            if (totals.shippingCost === 0) {
+                shippingCostSpan.textContent = 'Grátis';
+                shippingCostSpan.classList.add('text-success');
+            } else {
+                shippingCostSpan.textContent = `R$ ${totals.shippingCost.toFixed(2)}`;
+                shippingCostSpan.classList.remove('text-success');
+            }
+        }
+        
+        // Atualizar o total
+        totalAmountSpan.textContent = `R$ ${totals.total.toFixed(2)}`;
+        
+        // Se há cupom aplicado, mostrar o desconto
+        if (appliedCoupon) {
+            // Adicionar linha de desconto se não existir
+            let discountRow = document.getElementById('discount-row');
+            if (!discountRow) {
+                discountRow = document.createElement('div');
+                discountRow.id = 'discount-row';
+                discountRow.classList.add('d-flex', 'justify-content-between', 'p-2', 'border-top', 'text-success');
+                discountRow.innerHTML = `
+                    <span>Desconto (${appliedCoupon}):</span>
+                    <span>-R$ ${totals.discountAmount.toFixed(2)}</span>
+                `;
+                
+                // Inserir antes do frete
+                const shippingRow = document.querySelector('.order-summary .border-top');
+                if (shippingRow) {
+                    shippingRow.parentNode.insertBefore(discountRow, shippingRow);
+                }
+            } else {
+                discountRow.innerHTML = `
+                    <span>Desconto (${appliedCoupon}):</span>
+                    <span>-R$ ${totals.discountAmount.toFixed(2)}</span>
+                `;
+            }
+        } else {
+            // Remover linha de desconto se não há cupom
+            const discountRow = document.getElementById('discount-row');
+            if (discountRow) {
+                discountRow.remove();
+            }
+        }
     }
 
     function updatePlaceOrderButtonState() {
@@ -125,8 +211,28 @@ document.addEventListener('sharedContentLoaded', () => {
     applyCouponBtn.addEventListener('click', () => {
         const couponCode = couponInput.value.trim();
         if (couponCode) {
-            alert(`Cupom ${couponCode} aplicado! (Funcionalidade de cupom será implementada)`);
-            // Lógica para aplicar cupom e recalcular total
+            // Simular cupons válidos (em um sistema real, isso viria do backend)
+            const validCoupons = {
+                'DESCONTO10': 10, // 10% de desconto
+                'DESCONTO20': 20, // 20% de desconto
+                'FRETEZERO': 0    // Frete grátis
+            };
+            
+            if (validCoupons.hasOwnProperty(couponCode.toUpperCase())) {
+                appliedCoupon = couponCode.toUpperCase();
+                couponDiscount = validCoupons[appliedCoupon];
+                
+                // Se for cupom de frete grátis, aplicar desconto no frete
+                if (couponCode.toUpperCase() === 'FRETEZERO') {
+                    couponDiscount = 0; // Não aplicar desconto percentual
+                }
+                
+                alert(`Cupom ${appliedCoupon} aplicado com sucesso!`);
+                couponInput.value = '';
+                renderOrderSummary(); // Recalcular totais
+            } else {
+                alert('Cupom inválido. Tente: DESCONTO10, DESCONTO20 ou FRETEZERO');
+            }
         } else {
             alert('Por favor, digite um código de cupom.');
         }
