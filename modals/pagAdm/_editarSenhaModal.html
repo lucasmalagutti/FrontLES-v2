@@ -10,18 +10,33 @@
                 <form class="row g-3">
                     <div class="col-12">
                         <label for="senhaAtual" class="form-label">Senha Atual</label>
-                        <input type="password" class="form-control" id="senhaAtual"
-                            placeholder="Digite sua senha atual">
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="senhaAtual"
+                                placeholder="Digite sua senha atual">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleSenhaAtual">
+                                <i class="bi bi-eye" id="iconSenhaAtual"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="col-12">
                         <label for="novaSenha" class="form-label">Nova Senha</label>
-                        <input type="password" class="form-control" id="novaSenha"
-                            placeholder="Digite sua nova senha">
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="novaSenha"
+                                placeholder="Digite sua nova senha">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleNovaSenha">
+                                <i class="bi bi-eye" id="iconNovaSenha"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="col-12">
                         <label for="confirmarNovaSenha" class="form-label">Confirmar Nova Senha</label>
-                        <input type="password" class="form-control" id="confirmarNovaSenha"
-                            placeholder="Confirme sua nova senha">
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="confirmarNovaSenha"
+                                placeholder="Confirme sua nova senha">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleConfirmarNovaSenha">
+                                <i class="bi bi-eye" id="iconConfirmarNovaSenha"></i>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
