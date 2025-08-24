@@ -1,0 +1,51 @@
+<div class="modal fade" id="gerenciarPedidosModal" tabindex="-1" aria-labelledby="gerenciarPedidosModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gerenciarPedidosModalLabel">Gerenciar Pedidos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6>Filtrar por Status:</h6>
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="statusFilter" id="todos" value="todos" checked>
+                        <label class="btn btn-outline-primary" for="todos">Todos</label>
+                        
+                        <input type="radio" class="btn-check" name="statusFilter" id="emProcessamento" value="EM PROCESSAMENTO">
+                        <label class="btn btn-outline-warning" for="emProcessamento">Em Processamento</label>
+                        
+                        <input type="radio" class="btn-check" name="statusFilter" id="emTroca" value="EM TROCA">
+                        <label class="btn btn-outline-danger" for="emTroca">Em Troca</label>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="pedidosTable">
+                        <thead>
+                            <tr>
+                                <th>ID do Pedido</th>
+                                <th>Cliente</th>
+                                <th>Data</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Itens</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pedidosTableBody">
+                            <!-- Dados serão carregados dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning me-2" onclick="resetarPedidos()">
+                    <i class="bi bi-arrow-clockwise"></i> Resetar Pedidos para Status Inicial
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>

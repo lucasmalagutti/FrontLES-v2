@@ -1,0 +1,29 @@
+<div class="modal fade" id="confirmarTrocaModal" tabindex="-1" aria-labelledby="confirmarTrocaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmarTrocaModalLabel">Confirmar Autorização de Troca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Atenção!</strong> Você está prestes a autorizar a troca do pedido.
+                </div>
+                <p>Tem certeza que deseja autorizar a troca do pedido <strong id="pedidoTrocaConfirmId"></strong>?</p>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Importante:</strong> Após autorizar a troca, você deverá confirmar quando os itens chegarem para gerar o cupom de troca.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmarTrocaBtn">
+                    <i class="bi bi-check-circle"></i> Confirmar Autorização
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

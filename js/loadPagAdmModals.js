@@ -7,7 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'modals/pagAdm/_addEnderecoModal.html',
         'modals/pagAdm/_editarSenhaModal.html',
         'modals/pagAdm/_addCartaoModal.html',
-        'modals/pagAdm/_transacoesModal.html'
+        'modals/pagAdm/_transacoesModal.html',
+        'modals/pagAdm/_gerenciarPedidosModal.html',
+        'modals/pagAdm/_confirmarTrocaModal.html',
+        'modals/pagAdm/_confirmarChegadaItensModal.html'
     ];
 
     modalsToLoad.forEach(modalPath => {

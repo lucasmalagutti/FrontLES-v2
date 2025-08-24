@@ -1,0 +1,107 @@
+<div class="modal fade" id="confirmarChegadaItensModal" tabindex="-1" aria-labelledby="confirmarChegadaItensModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmarChegadaItensModalLabel">Confirmar Chegada dos Itens</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success">
+                    <i class="bi bi-box-seam me-2"></i>
+                    <strong>Itens Recebidos!</strong> Confirme que os itens da troca chegaram em perfeito estado.
+                </div>
+                
+                <p>Pedido: <strong id="pedidoChegadaId"></strong></p>
+                <p>Cliente: <strong id="clienteChegadaId"></strong></p>
+                
+                <div class="mb-3">
+                    <label for="observacoesItens" class="form-label">Observações sobre o estado dos itens:</label>
+                    <textarea class="form-control" id="observacoesItens" rows="3" 
+                        placeholder="Descreva o estado dos itens recebidos (opcional)"></textarea>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Ao confirmar, será gerado automaticamente um cupom de troca para o cliente.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmarChegadaBtn">
+                    <i class="bi bi-check-circle"></i> Confirmar Chegada e Gerar Cupom
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de sucesso com o cupom gerado -->
+<div class="modal fade" id="cupomGeradoModal" tabindex="-1" aria-labelledby="cupomGeradoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="cupomGeradoModalLabel">
+                    <i class="bi bi-ticket-perforated me-2"></i> Cupom de Troca Gerado!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Cupom gerado com sucesso!</strong>
+                    </div>
+                </div>
+                
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-ticket-perforated me-2"></i> Cupom de Troca</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <strong>Código do Cupom:</strong><br>
+                                <span class="badge bg-primary fs-6" id="codigoCupom"></span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Data de Geração:</strong><br>
+                                <span id="dataCupom"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6">
+                                <strong>Pedido:</strong><br>
+                                <span id="pedidoCupom"></span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Cliente:</strong><br>
+                                <span id="clienteCupom"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <strong>Valor do Cupom:</strong><br>
+                                <span class="fs-5 text-success fw-bold" id="valorCupom"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Instruções:</strong> Este cupom pode ser usado pelo cliente para trocar por produtos de valor igual ou superior.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="imprimirCupom()">
+                    <i class="bi bi-printer"></i> Imprimir Cupom
+                </button>
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
