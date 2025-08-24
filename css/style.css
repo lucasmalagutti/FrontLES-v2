@@ -54,14 +54,15 @@ body {
 /* Estilos para a Landing Page */
 
 #heroCarousel .carousel-item {
-    height: 60vh; /* Altura do carrossel */
+    height: 80vh;
     background-color: #777;
 }
 
 #heroCarousel .carousel-item img {
     object-fit: cover; /* Garante que a imagem cubra todo o espaço */
     object-position: center center; /* Tenta centralizar a parte mais importante */
-    height: 165%;/* Limita a altura máxima para manter proporções razoáveis */
+    height: 100%; /* Ajusta para 100% para não cortar a imagem */
+    width: 100%; /* Garante que a largura seja 100% */
 }
 
 #heroCarousel .carousel-caption {
