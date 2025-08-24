@@ -12,7 +12,7 @@ document.addEventListener('sharedContentLoaded', () => {
 
     let selectedAddress = null;
     let selectedCard = null;
-    let appliedCoupon = null;
+    let appliedCoupons = []; // Array para múltiplos cupons
     let couponDiscount = 0;
 
     const savedAddressesContainer = document.getElementById('saved-addresses');
@@ -21,12 +21,13 @@ document.addEventListener('sharedContentLoaded', () => {
     const addCardBtn = document.getElementById('add-card-btn');
     const couponInput = document.getElementById('coupon-input');
     const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const appliedCouponsContainer = document.getElementById('applied-coupons');
     const orderItemsContainer = document.getElementById('order-items');
     const totalAmountSpan = document.getElementById('total-amount');
     const placeOrderBtn = document.getElementById('place-order-btn');
     const cancelOrderBtn = document.getElementById('cancel-order-btn');
 
-    // Função para calcular o total considerando frete e cupom
+    // Função para calcular o total considerando frete e cupons
     function calculateTotal() {
         let subtotal = 0;
         let shippingCost = 10.00; // Valor fixo do frete
@@ -36,17 +37,29 @@ document.addEventListener('sharedContentLoaded', () => {
             subtotal += item.price * item.quantity;
         });
         
-        // Aplicar desconto do cupom (se houver)
-        let discountAmount = 0;
+        // Aplicar desconto dos cupons (se houver)
+        let totalDiscountAmount = 0;
         let subtotalWithDiscount = subtotal;
         
-        if (appliedCoupon && appliedCoupon !== 'FRETEZERO') {
-            discountAmount = subtotal * (couponDiscount / 100);
-            subtotalWithDiscount = subtotal - discountAmount;
+        if (appliedCoupons.length > 0) {
+            // Calcular desconto total de todos os cupons percentuais
+            appliedCoupons.forEach(coupon => {
+                if (coupon !== 'FRETEZERO') {
+                    const validCoupons = {
+                        'DESCONTO10': 10,
+                        'DESCONTO20': 20
+                    };
+                    if (validCoupons[coupon]) {
+                        totalDiscountAmount += subtotal * (validCoupons[coupon] / 100);
+                    }
+                }
+            });
+            
+            subtotalWithDiscount = subtotal - totalDiscountAmount;
         }
         
         // Aplicar cupom de frete grátis
-        if (appliedCoupon === 'FRETEZERO') {
+        if (appliedCoupons.includes('FRETEZERO')) {
             shippingCost = 0;
         }
         
@@ -56,7 +69,7 @@ document.addEventListener('sharedContentLoaded', () => {
         return {
             subtotal: subtotal,
             subtotalWithDiscount: subtotalWithDiscount,
-            discountAmount: discountAmount,
+            discountAmount: totalDiscountAmount,
             shippingCost: shippingCost,
             total: total
         };
@@ -108,6 +121,38 @@ document.addEventListener('sharedContentLoaded', () => {
         }
     }
 
+    function renderAppliedCoupons() {
+        if (appliedCoupons.length === 0) {
+            appliedCouponsContainer.innerHTML = '<p class="text-muted">Nenhum cupom aplicado.</p>';
+        } else {
+            appliedCouponsContainer.innerHTML = '';
+            appliedCoupons.forEach(coupon => {
+                const couponDiv = document.createElement('div');
+                couponDiv.classList.add('badge', 'bg-info', 'text-dark', 'me-2', 'mb-2', 'p-2');
+                
+                let discountText = '';
+                if (coupon === 'FRETEZERO') {
+                    discountText = 'Frete Grátis';
+                } else if (coupon === 'DESCONTO10') {
+                    discountText = '10% de desconto';
+                } else if (coupon === 'DESCONTO20') {
+                    discountText = '20% de desconto';
+                }
+                
+                couponDiv.innerHTML = `
+                    ${coupon} (${discountText})
+                    <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remover cupom"></button>
+                `;
+                
+                couponDiv.querySelector('.btn-close').addEventListener('click', () => {
+                    removeCoupon(coupon);
+                });
+                
+                appliedCouponsContainer.appendChild(couponDiv);
+            });
+        }
+    }
+
     function renderOrderSummary() {
         orderItemsContainer.innerHTML = '';
         
@@ -147,7 +192,7 @@ document.addEventListener('sharedContentLoaded', () => {
         totalAmountSpan.textContent = `R$ ${totals.total.toFixed(2)}`;
         
         // Se há cupom aplicado, mostrar o desconto
-        if (appliedCoupon) {
+        if (appliedCoupons.length > 0) {
             // Adicionar linha de desconto se não existir
             let discountRow = document.getElementById('discount-row');
             if (!discountRow) {
@@ -155,7 +200,7 @@ document.addEventListener('sharedContentLoaded', () => {
                 discountRow.id = 'discount-row';
                 discountRow.classList.add('d-flex', 'justify-content-between', 'p-2', 'border-top', 'text-success');
                 discountRow.innerHTML = `
-                    <span>Desconto (${appliedCoupon}):</span>
+                    <span>Desconto (${appliedCoupons.join(', ')}):</span>
                     <span>-R$ ${totals.discountAmount.toFixed(2)}</span>
                 `;
                 
@@ -166,7 +211,7 @@ document.addEventListener('sharedContentLoaded', () => {
                 }
             } else {
                 discountRow.innerHTML = `
-                    <span>Desconto (${appliedCoupon}):</span>
+                    <span>Desconto (${appliedCoupons.join(', ')}):</span>
                     <span>-R$ ${totals.discountAmount.toFixed(2)}</span>
                 `;
             }
@@ -191,6 +236,44 @@ document.addEventListener('sharedContentLoaded', () => {
         }
     }
 
+    function applyCoupon(couponCode) {
+        const validCoupons = {
+            'DESCONTO10': 10, // 10% de desconto
+            'DESCONTO20': 20, // 20% de desconto
+            'FRETEZERO': 0    // Frete grátis
+        };
+        
+        if (validCoupons.hasOwnProperty(couponCode.toUpperCase())) {
+            if (!appliedCoupons.includes(couponCode.toUpperCase())) {
+                appliedCoupons.push(couponCode.toUpperCase());
+                couponDiscount = validCoupons[couponCode.toUpperCase()];
+                
+                // Se for cupom de frete grátis, aplicar desconto no frete
+                if (couponCode.toUpperCase() === 'FRETEZERO') {
+                    couponDiscount = 0; // Não aplicar desconto percentual
+                }
+                
+                alert(`Cupom ${couponCode} aplicado com sucesso!`);
+                couponInput.value = '';
+                renderOrderSummary(); // Recalcular totais
+                renderAppliedCoupons(); // Atualizar a lista de cupons aplicados
+            } else {
+                alert('Este cupom já foi aplicado.');
+            }
+        } else {
+            alert('Cupom inválido. Tente: DESCONTO10, DESCONTO20 ou FRETEZERO');
+        }
+    }
+
+    function removeCoupon(couponCode) {
+        const index = appliedCoupons.indexOf(couponCode);
+        if (index > -1) {
+            appliedCoupons.splice(index, 1);
+            renderOrderSummary(); // Recalcular totais
+            renderAppliedCoupons(); // Atualizar a lista de cupons aplicados
+        }
+    }
+
     // Event Listeners
     addAddressBtn.addEventListener('click', () => {
         const addEnderecoModalEl = document.getElementById('addEnderecoModal');
@@ -211,28 +294,7 @@ document.addEventListener('sharedContentLoaded', () => {
     applyCouponBtn.addEventListener('click', () => {
         const couponCode = couponInput.value.trim();
         if (couponCode) {
-            // Simular cupons válidos (em um sistema real, isso viria do backend)
-            const validCoupons = {
-                'DESCONTO10': 10, // 10% de desconto
-                'DESCONTO20': 20, // 20% de desconto
-                'FRETEZERO': 0    // Frete grátis
-            };
-            
-            if (validCoupons.hasOwnProperty(couponCode.toUpperCase())) {
-                appliedCoupon = couponCode.toUpperCase();
-                couponDiscount = validCoupons[appliedCoupon];
-                
-                // Se for cupom de frete grátis, aplicar desconto no frete
-                if (couponCode.toUpperCase() === 'FRETEZERO') {
-                    couponDiscount = 0; // Não aplicar desconto percentual
-                }
-                
-                alert(`Cupom ${appliedCoupon} aplicado com sucesso!`);
-                couponInput.value = '';
-                renderOrderSummary(); // Recalcular totais
-            } else {
-                alert('Cupom inválido. Tente: DESCONTO10, DESCONTO20 ou FRETEZERO');
-            }
+            applyCoupon(couponCode);
         } else {
             alert('Por favor, digite um código de cupom.');
         }
@@ -260,6 +322,7 @@ document.addEventListener('sharedContentLoaded', () => {
     // Inicialização
     renderAddresses();
     renderCards();
+    renderAppliedCoupons(); // Inicializar a lista de cupons aplicados
     renderOrderSummary();
     updatePlaceOrderButtonState();
 });
