@@ -56,13 +56,44 @@
         </nav>
     </header>
 
-    <section class="hero-section text-center text-white d-flex align-items-center justify-content-center">
-        <div class="container">
-            <h1 class="display-4 fw-bold">Equipamentos de Alta Performance</h1>
-            <p class="lead">Encontre os melhores artigos para futebol e basquete e eleve seu jogo a outro nível.</p>
-            <a href="#" class="btn btn-primary btn-lg">Confira as Novidades</a>
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
         </div>
-    </section>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="" class="d-block w-100" alt="">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>Eleve seu Jogo com os Melhores Equipamentos de Futebol</h5>
+                    <p>Encontre chuteiras, bolas e acessórios de alta performance.</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="" class="d-block w-100" alt="">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>Domine as Quadras com Nossos Produtos de Basquete</h5>
+                    <p>Bolas, aros e vestuário para todos os níveis de jogo.</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="" class="d-block w-100" alt="">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>Paixão por Esporte, Qualidade Garantida</h5>
+                    <p>Descubra nossa ampla seleção e encontre o que você precisa para brilhar.</p>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
 
     <div class="container my-5">
         <section class="text-center mb-5">
