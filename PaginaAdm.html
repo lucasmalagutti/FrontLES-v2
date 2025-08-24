@@ -6,15 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PaginaAdm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
     <div class="container">
         <header class="d-flex justify-content-between align-items-center my-4">
             <h1>Lista de Clientes</h1>
-            <button class="btn btn-primary">Atualizar Lista</button>
+            <div>
+                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#gerenciarPedidosModal">
+                    <i class="bi bi-cart-check"></i> Gerenciar Pedidos
+                </button>
+                <button class="btn btn-primary">Atualizar Lista</button>
+            </div>
         </header>
+        
+        <a href="example.html">voltar</a>
 
         <div class="row mb-3">
             <form class="row g-3">
@@ -108,6 +116,7 @@
     <script src="js/script.js"></script>
     <script src="js/passwordToggle.js"></script> <!-- Funcionalidade de mostrar/ocultar senha -->
     <script src="js/loadPagAdmModals.js"></script>
+    <script src="js/gerenciarPedidos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
