@@ -1,12 +1,12 @@
 document.addEventListener('sharedContentLoaded', () => {
     // Dados de vendas simulados
     const salesData = [
-        { date: '2023-10-01', productId: '1', quantity: 5, total: 999.50 },
-        { date: '2023-10-02', productId: '5', quantity: 3, total: 389.70 },
-        { date: '2023-10-05', productId: '2', quantity: 10, total: 899.00 },
-        { date: '2023-10-15', productId: '1', quantity: 2, total: 399.80 },
-        { date: '2023-11-10', productId: '6', quantity: 1, total: 899.90 },
-        { date: '2023-11-12', productId: '3', quantity: 4, total: 719.60 },
+        { date: '2025-10-01', productId: '1', quantity: 5, total: 999.50 },
+        { date: '2025-10-02', productId: '5', quantity: 3, total: 389.70 },
+        { date: '2025-10-05', productId: '2', quantity: 10, total: 899.00 },
+        { date: '2025-10-15', productId: '1', quantity: 2, total: 399.80 },
+        { date: '2025-11-10', productId: '6', quantity: 1, total: 899.90 },
+        { date: '2025-11-12', productId: '3', quantity: 4, total: 719.60 },
     ];
 
     const salesReportForm = document.getElementById('salesReportForm');
@@ -60,7 +60,9 @@ document.addEventListener('sharedContentLoaded', () => {
             datasets: [{
                 label: 'Total de Vendas (R$)',
                 data: [],
-                backgroundColor: ['rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 132, 0.6)']
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
             }]
         };
 
@@ -81,7 +83,7 @@ document.addEventListener('sharedContentLoaded', () => {
             salesChart.destroy();
         }
         salesChart = new Chart(salesChartCanvas, {
-            type: 'bar',
+            type: 'line',
             data: data,
             options: {
                 scales: {
