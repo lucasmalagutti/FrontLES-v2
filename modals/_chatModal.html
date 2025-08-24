@@ -1,0 +1,27 @@
+<button class="chat-btn" data-bs-toggle="modal" data-bs-target="#chatModal">
+    <img src="imagens/logo/icone-IA.png" alt="Abrir Chat">
+  </button>
+
+  <!-- Modal do Chat -->
+  <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-end">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="chatModalLabel">Atendimento Online</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body d-flex flex-column">
+          <!-- Área do chat -->
+          <div class="chat-box flex-grow-1 mb-2">
+            <div><strong>Atendente:</strong> Olá, em que posso ajudar?</div>
+          </div>
+
+          <!-- Input para digitar mensagem -->
+          <div class="chat-input d-flex">
+            <input type="text" class="form-control me-2" placeholder="Digite sua mensagem...">
+            <button class="btn btn-primary">Enviar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,84 @@
+<header class="bg-dark text-white">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="imagens/logo/logo(1).png" alt="LL Sport Logo" width="120">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="futebol.html">Futebol</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="basquete.html">Basquete</a>
+                    </li>
+                </ul>
+                <form class="d-flex me-3" onsubmit="return realizarBusca(event)">
+                    <input class="form-control me-2" type="search" placeholder="Buscar produtos..." id="searchInput"
+                        aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">Buscar</button>
+                    <button type="button" class="btn btn-outline-light ms-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+                    <a href="FormCliente.html" class="btn btn-outline-light ms-2">Cadastrar</a>
+                </form>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-person-fill"></i> Minha Conta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="cart-icon" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas" aria-controls="cartOffcanvas"><i class="bi bi-cart-fill"></i> Carrinho (<span id="cart-count">0</span>)</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="cartOffcanvasLabel">Carrinho</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div id="empty-cart-message">Seu carrinho está vazio</div>
+      <div id="cart-items-container"></div>
+      <hr>
+      <p><strong>Total:</strong> R$ <span id="cart-total">0.00</span></p>
+      <button class="btn btn-success w-100" id="checkout-btn">Finalizar Compra</button>
+      <button class="btn btn-danger w-100 mt-2" id="clear-cart-btn">Esvaziar Carrinho</button>
+    </div>
+  </div>
+
+<footer class="bg-dark text-white pt-5 pb-4">
+    <div class="container text-center text-md-start">
+        <div class="row text-center text-md-start">
+            <div class="col-md-6 col-lg-6 col-xl-6 mx-auto mt-3">
+                <h5 class="text-uppercase mb-4 fw-bold text-primary">LL Sports</h5>
+                <p>Sua paixão pelo esporte começa aqui. Oferecemos os melhores produtos para você alcançar seu
+                    potencial máximo.</p>
+            </div>
+            <div class="col-md-6 col-lg-6 col-xl-6 mx-auto mt-3">
+                <h5 class="text-uppercase mb-4 fw-bold text-primary">Contato</h5>
+                <p><i class="bi bi-geo-alt-fill me-3"></i> São Paulo, SP, Brasil</p>
+                <p><i class="bi bi-envelope-fill me-3"></i> contato@llsports.com</p>
+                <p><i class="bi bi-telephone-fill me-3"></i> +55 11 99999-9999</p>
+            </div>
+        </div>
+        <hr class="mb-4">
+        <div class="row align-items-center">
+            <div class="col-12 text-center">
+                <p>© 2024 Copyright:
+                    <a href="#" class="text-white" style="text-decoration: none;">
+                        <strong class="text-primary">LLSports.com</strong>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>

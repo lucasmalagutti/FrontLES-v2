@@ -1,0 +1,90 @@
+<div class="modal fade" id="addEnderecoModal" tabindex="-1" aria-labelledby="addEnderecoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addEnderecoModalLabel">Adicionar Endereço</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3">
+                    <div class="col-md-6">
+                        <label for="addEnderecoNomeEntrega" class="form-label">Nome do Endereço</label>
+                        <input type="text" id="addEnderecoNomeEntrega" name="nomeEntrega" class="form-control"
+                            placeholder="ex: Trabalho, Casa da Mãe, etc.">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addEnderecoTipoEndereco" class="form-label">Tipo de Endereço</label>
+                        <select id="addEnderecoTipoEndereco" class="form-select">
+                            <option selected>Selecione</option>
+                            <option>Entrega</option>
+                            <option>Cobrança</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addEnderecoTipoResidenciaEntrega" class="form-label">Tipo Residência</label>
+                        <select id="addEnderecoTipoResidenciaEntrega" class="form-select">
+                            <option selected>Selecione</option>
+                            <option>Casa</option>
+                            <option>Apartamento</option>
+                            <option>Rural</option>
+                            <option>Outros</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addEnderecoTipoLogradouroEntrega" class="form-label">Tipo Logradouro</label>
+                        <select id="addEnderecoTipoLogradouroEntrega" class="form-select">
+                            <option selected>Selecione</option>
+                            <option>Rua</option>
+                            <option>Avenida</option>
+                            <option>Condomínio</option>
+                            <option>Travessa</option>
+                            <option>Estrada</option>
+                            <option>Praça</option>
+                            <option>Outros</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addEnderecoLogradouroEntrega" class="form-label">Logradouro</label>
+                        <input type="text" id="addEnderecoLogradouroEntrega" name="logradouroEntrega"
+                            class="form-control" placeholder="Digite seu logradouro aqui">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="addEnderecoNumeroEntrega" class="form-label">Número</label>
+                        <input type="text" id="addEnderecoNumeroEntrega" name="numeroEntrega" class="form-control"
+                            placeholder="Digite o número do seu logradouro aqui">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="addEnderecoCepEntrega" class="form-label">CEP</label>
+                        <input type="text" id="addEnderecoCepEntrega" name="cepEntrega" class="form-control"
+                            placeholder="00000-000">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addEnderecoBairroEntrega" class="form-label">Bairro</label>
+                        <input type="text" id="addEnderecoBairroEntrega" name="bairroEntrega" class="form-control"
+                            placeholder="Digite seu bairro aqui">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addEnderecoCidadeEntrega" class="form-label">Cidade</label>
+                        <input type="text" id="addEnderecoCidadeEntrega" name="cidadeEntrega" class="form-control"
+                            placeholder="Digite sua cidade aqui">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="addEnderecoEstadoEntrega" class="form-label">Estado</label>
+                        <input type="text" id="addEnderecoEstadoEntrega" name="estadoEntrega" class="form-control"
+                            placeholder="Digite seu estado aqui">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="addEnderecoPaisEntrega" class="form-label">País</label>
+                        <input type="text" id="addEnderecoPaisEntrega" name="paisEntrega" class="form-control"
+                            placeholder="Digite seu país aqui">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="salvarEnderecoBtn">Salvar Endereço</button>
+            </div>
+        </div>
+    </div>
+</div>

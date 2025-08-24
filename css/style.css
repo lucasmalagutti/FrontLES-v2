@@ -7,7 +7,49 @@
 }
 
 body {
+    padding-top: 70px;
 }
+
+.navbar {
+    position: fixed;
+    top:0;
+    width: 100%;
+    z-index: 1030;
+}
+
+.chat-btn img {
+    width: 100px;
+}
+
+.chat-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050; /* para ficar acima de outros elementos */
+  }
+  .chat-box {
+    height: 400px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .chat-input {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+  }
 
 /* Estilos para a Landing Page */
 
@@ -18,7 +60,8 @@ body {
 
 #heroCarousel .carousel-item img {
     object-fit: cover; /* Garante que a imagem cubra todo o espaço */
-    height: 100%;
+    object-position: center center; /* Tenta centralizar a parte mais importante */
+    height: 165%;/* Limita a altura máxima para manter proporções razoáveis */
 }
 
 #heroCarousel .carousel-caption {

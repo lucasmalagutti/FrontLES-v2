@@ -1,0 +1,57 @@
+<div class="modal fade" id="editarDadosModal" tabindex="-1" aria-labelledby="editarDadosModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarDadosModalLabel">Editar Dados do Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3">
+                    <div class="col-md-6">
+                        <label for="editNomeCompleto" class="form-label">Nome Completo</label>
+                        <input type="text" class="form-control" id="editNomeCompleto" placeholder="Nome Completo">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="editDataNascimento" class="form-label">Data Nascimento</label>
+                        <input type="date" class="form-control" id="editDataNascimento">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="editGenero" class="form-label">Gênero</label>
+                        <select id="editGenero" class="form-select">
+                            <option selected>Selecione</option>
+                            <option>Masculino</option>
+                            <option>Feminino</option>
+                            <option>Outro</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" placeholder="example@email.com">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="editTipoTelefone" class="form-label">Tipo Telefone</label>
+                        <select id="editTipoTelefone" class="form-select">
+                            <option selected>Selecione</option>
+                            <option>Fixo</option>
+                            <option>Comercial</option>
+                            <option>Celular</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="editDdd" class="form-label">DDD</label>
+                        <input type="text" class="form-control" id="editDdd" placeholder="00">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="editNumeroTelefone" class="form-label">Número Telefone</label>
+                        <input type="text" class="form-control" id="editNumeroTelefone" placeholder="00000-0000">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="salvarAlteracoesBtn">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+</div>

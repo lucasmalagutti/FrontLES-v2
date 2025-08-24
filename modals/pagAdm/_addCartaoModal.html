@@ -1,0 +1,44 @@
+<div class="modal fade" id="addCartaoModal" tabindex="-1" aria-labelledby="addCartaoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCartaoModalLabel">Adicionar Cartão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3">
+                    <div class="col-md-6">
+                        <label for="addCartaoNomeImpresso" class="form-label">Nome Impresso</label>
+                        <input type="text" id="addCartaoNomeImpresso" name="nomeImpresso" class="form-control"
+                            placeholder="Digite nome completo impresso no cartão">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addCartaoNumero" class="form-label">Número do Cartão</label>
+                        <input type="text" id="addCartaoNumero" name="numeroCartao" class="form-control"
+                            placeholder="0000.0000.0000.0000">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="addCartaoCvv" class="form-label">CVV</label>
+                        <input type="text" id="addCartaoCvv" name="cvv" class="form-control" placeholder="000">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="addCartaoBandeira" class="form-label">Bandeira</label>
+                        <select id="addCartaoBandeira" name="bandeira" class="form-select">
+                            <option selected>Selecione</option>
+                            <option>Visa</option>
+                            <option>MasterCard</option>
+                            <option>American Express</option>
+                            <option>Elo</option>
+                            <option>HiperCard</option>
+                            <option>Aura</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="salvarCartaoBtn">Salvar Cartão</button>
+            </div>
+        </div>
+    </div>
+</div>

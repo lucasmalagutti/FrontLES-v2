@@ -1,0 +1,34 @@
+<div class="modal fade" id="editarSenhaModal" tabindex="-1" aria-labelledby="editarSenhaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarSenhaModalLabel">Editar Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3">
+                    <div class="col-12">
+                        <label for="senhaAtual" class="form-label">Senha Atual</label>
+                        <input type="password" class="form-control" id="senhaAtual"
+                            placeholder="Digite sua senha atual">
+                    </div>
+                    <div class="col-12">
+                        <label for="novaSenha" class="form-label">Nova Senha</label>
+                        <input type="password" class="form-control" id="novaSenha"
+                            placeholder="Digite sua nova senha">
+                    </div>
+                    <div class="col-12">
+                        <label for="confirmarNovaSenha" class="form-label">Confirmar Nova Senha</label>
+                        <input type="password" class="form-control" id="confirmarNovaSenha"
+                            placeholder="Confirme sua nova senha">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="salvarSenhaBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>

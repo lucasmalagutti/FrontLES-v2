@@ -76,7 +76,6 @@ const produtos = [
     }
 ];
 
-// Função para realizar a busca
 function realizarBusca(event) {
     event.preventDefault();
     
@@ -88,14 +87,12 @@ function realizarBusca(event) {
         return false;
     }
     
-    // Redirecionar para a página de resultados com o termo de busca
-    const url = `resultados-busca.html?q=${encodeURIComponent(termoBusca)}`;
+    const url = `resultadosBusca.html?q=${encodeURIComponent(termoBusca)}`;
     window.location.href = url;
     
     return false;
 }
 
-// Função para exibir os resultados da busca
 function exibirResultados() {
     const urlParams = new URLSearchParams(window.location.search);
     const termoBusca = urlParams.get('q');
@@ -104,16 +101,12 @@ function exibirResultados() {
         window.location.href = 'index.html';
         return;
     }
-    
-    // Exibir o termo de busca
+
     document.getElementById('searchTerm').textContent = termoBusca;
     
-    // Mostrar loading
     document.getElementById('loadingMessage').classList.remove('d-none');
     
-    // Simular delay para melhor UX
     setTimeout(() => {
-        // Filtrar produtos
         const produtosFiltrados = produtos.filter(produto => 
             produto.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
             produto.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
@@ -123,17 +116,14 @@ function exibirResultados() {
         document.getElementById('loadingMessage').classList.add('d-none');
         
         if (produtosFiltrados.length === 0) {
-            // Nenhum resultado encontrado
             document.getElementById('noResultsMessage').classList.remove('d-none');
         } else {
-            // Exibir resultados
             document.getElementById('resultsContainer').classList.remove('d-none');
             renderizarProdutos(produtosFiltrados);
         }
     }, 1000);
 }
 
-// Função para renderizar os produtos
 function renderizarProdutos(produtosParaExibir) {
     const productsGrid = document.getElementById('productsGrid');
     productsGrid.innerHTML = '';
@@ -147,7 +137,12 @@ function renderizarProdutos(produtosParaExibir) {
                         <h5 class="card-title">${produto.nome}</h5>
                         <p class="card-text">${produto.descricao}</p>
                         <p class="fw-bold fs-5">${produto.preco}</p>
-                        <a href="#" class="btn btn-primary w-100">Comprar</a>
+                        <div class="d-flex justify-content-center align-items-center mb-2">
+                                <button class="btn btn-sm btn-outline-secondary decrease-product-quantity" data-product-id="2">-</button>
+                                <span class="mx-2 product-quantity-display" data-product-id="2">1</span>
+                                <button class="btn btn-sm btn-outline-secondary increase-product-quantity" data-product-id="2">+</button>
+                            </div>
+                        <a href="#" class="btn btn-primary w-100 add-to-cart">Comprar</a>
                     </div>
                 </div>
             </div>
@@ -156,7 +151,6 @@ function renderizarProdutos(produtosParaExibir) {
     });
 }
 
-// Função para buscar produtos em tempo real (opcional)
 function buscarEmTempoReal(termo) {
     if (termo.length < 2) return [];
     
@@ -167,20 +161,16 @@ function buscarEmTempoReal(termo) {
     );
 }
 
-// Inicializar a página quando carregar
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se estamos na página de resultados
-    if (window.location.pathname.includes('resultados-busca.html')) {
+    if (window.location.pathname.includes('resultadosBusca.html')) {
         exibirResultados();
     }
     
-    // Adicionar evento de busca em tempo real (opcional)
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             const termo = this.value.trim();
             if (termo.length >= 2) {
-                // Aqui você pode implementar sugestões em tempo real
                 console.log('Buscando:', termo);
             }
         });
