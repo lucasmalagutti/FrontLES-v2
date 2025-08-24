@@ -1,80 +1,4 @@
-// Base de dados dos produtos
-const produtos = [
-    // Futebol
-    {
-        id: 1,
-        nome: "Bola de Futebol Nike",
-        descricao: "Bola oficial Nike para campos, alta durabilidade e precisão.",
-        preco: "R$ 199,90",
-        categoria: "Futebol",
-        imagem: "imagens/futebol/bolaNike.avif",
-        alt: "Bola de Futebol Nike"
-    },
-    {
-        id: 2,
-        nome: "Cones",
-        descricao: "Cones versáteis para exercícios de agilidade e treinos técnicos.",
-        preco: "R$ 89,90",
-        categoria: "Futebol",
-        imagem: "imagens/futebol/cones.jpg",
-        alt: "Cones"
-    },
-    {
-        id: 3,
-        nome: "Rede para trave de Campo",
-        descricao: "Rede resistente e durável para traves de futebol profissional.",
-        preco: "R$ 179,90",
-        categoria: "Futebol",
-        imagem: "imagens/futebol/rede.jpg",
-        alt: "Rede para trave de Campo"
-    },
-    {
-        id: 4,
-        nome: "Bandeira de Escanteio",
-        descricao: "Bandeiras oficiais para marcar escanteios e laterais do campo.",
-        preco: "R$ 49,90",
-        categoria: "Futebol",
-        imagem: "imagens/futebol/bandeira.jpg",
-        alt: "Bandeira de Escanteio"
-    },
-    // Basquete
-    {
-        id: 5,
-        nome: "Bola de Basquete oficial",
-        descricao: "Bola oficial para quadras internas e externas, com excelente aderência.",
-        preco: "R$ 129,90",
-        categoria: "Basquete",
-        imagem: "imagens/basquete/bolaBasquete.jpg",
-        alt: "Bola de Basquete"
-    },
-    {
-        id: 6,
-        nome: "Tabela",
-        descricao: "Tabela de basquete resistente para quadras profissionais e amadoras.",
-        preco: "R$ 899,90",
-        categoria: "Basquete",
-        imagem: "imagens/basquete/tabela.png",
-        alt: "Tabela"
-    },
-    {
-        id: 7,
-        nome: "Aro",
-        descricao: "Aro de basquete regulável com rede, ideal para treinos e jogos.",
-        preco: "R$ 399,90",
-        categoria: "Basquete",
-        imagem: "imagens/basquete/aro.jpg",
-        alt: "Aro"
-    },
-    {
-        id: 8,
-        nome: "Retornador de Bolas",
-        descricao: "Retornador de bolas para treinos de basquete, ideal para prática individual.",
-        preco: "R$ 45,90",
-        categoria: "Basquete",
-        imagem: "imagens/basquete/retornador.jpg",
-        alt: "Retornador de Bolas"
-    }
-];
+// Funcionalidades de busca - usa produtos definidos em productData.js
 
 function realizarBusca(event) {
     event.preventDefault();
@@ -136,11 +60,11 @@ function renderizarProdutos(produtosParaExibir) {
                     <div class="card-body">
                         <h5 class="card-title">${produto.nome}</h5>
                         <p class="card-text">${produto.descricao}</p>
-                        <p class="fw-bold fs-5">${produto.preco}</p>
+                        <p class="fw-bold fs-5">R$ ${produto.preco.toFixed(2)}</p>
                         <div class="d-flex justify-content-center align-items-center mb-2">
-                                <button class="btn btn-sm btn-outline-secondary decrease-product-quantity" data-product-id="2">-</button>
-                                <span class="mx-2 product-quantity-display" data-product-id="2">1</span>
-                                <button class="btn btn-sm btn-outline-secondary increase-product-quantity" data-product-id="2">+</button>
+                                <button class="btn btn-sm btn-outline-secondary decrease-product-quantity" data-product-id="${produto.id}">-</button>
+                                <span class="mx-2 product-quantity-display" data-product-id="${produto.id}">1</span>
+                                <button class="btn btn-sm btn-outline-secondary increase-product-quantity" data-product-id="${produto.id}">+</button>
                             </div>
                         <a href="#" class="btn btn-comprar w-100 add-to-cart">Comprar</a>
                     </div>
