@@ -142,7 +142,7 @@ function renderizarProdutos(produtosParaExibir) {
                                 <span class="mx-2 product-quantity-display" data-product-id="2">1</span>
                                 <button class="btn btn-sm btn-outline-secondary increase-product-quantity" data-product-id="2">+</button>
                             </div>
-                        <a href="#" class="btn btn-primary w-100 add-to-cart">Comprar</a>
+                        <a href="#" class="btn btn-comprar w-100 add-to-cart">Comprar</a>
                     </div>
                 </div>
             </div>
