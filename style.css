@@ -70,3 +70,35 @@ body {
     background: transparent;
     padding: 10px;
 }
+
+/* Estilo específico para a bola de basquete */
+.product-card img[src*="bolaBasquete"] {
+    height: 250px !important;
+    object-fit: contain !important;
+    background: transparent;
+    padding: 10px;
+}
+
+/* Estilo específico para a tabela de basquete */
+.product-card img[src*="tabela"] {
+    height: 250px !important;
+    object-fit: contain !important;
+    background: transparent;
+    padding: 10px;
+}
+
+/* Estilo específico para o aro de basquete */
+.product-card img[src*="aro"] {
+    height: 250px !important;
+    object-fit: contain !important;
+    background: transparent;
+    padding: 10px;
+}
+
+/* Estilo específico para o retornador de bolas */
+.product-card img[src*="retornador"] {
+    height: 250px !important;
+    object-fit: contain !important;
+    background: transparent;
+    padding: 10px;
+}
