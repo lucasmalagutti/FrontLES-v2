@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('sharedContentLoaded', () => {
     // Simulação de dados de carrinho, endereços e cartões
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     let savedAddresses = JSON.parse(localStorage.getItem('savedAddresses')) || [

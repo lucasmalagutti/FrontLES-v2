@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('sharedContentLoaded', () => {
     // Dados simulados do cliente
     const customerData = {
         name: "Luiz Eduardo",
