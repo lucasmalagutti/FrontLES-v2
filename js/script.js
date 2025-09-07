@@ -203,24 +203,6 @@ function initializeCartFunctionality() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const salvarClienteBtn = document.getElementById('salvarCliente');
-    const cancelarClienteBtn = document.getElementById('cancelarCliente');
-
-    if (salvarClienteBtn) {
-        salvarClienteBtn.addEventListener('click', () => {
-            showAlert('Cliente salvo com sucesso', 'success');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000); 
-        });
-    }
-
-    if (cancelarClienteBtn) {
-        cancelarClienteBtn.addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
-    }
-
     const salvarAlteracoesBtn = document.getElementById('salvarAlteracoesBtn');
     if (salvarAlteracoesBtn) {
         salvarAlteracoesBtn.addEventListener('click', () => {

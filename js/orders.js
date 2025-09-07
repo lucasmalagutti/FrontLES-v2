@@ -3,7 +3,7 @@ document.addEventListener('sharedContentLoaded', () => {
     let orders = JSON.parse(localStorage.getItem('orders')) || [
         {
             id: 'ORD001',
-            status: 'EM PROCESSAMENTO',
+            status: 'ENTREGUE',
             date: '2023-10-26',
             total: 150.75,
             items: [
@@ -13,7 +13,7 @@ document.addEventListener('sharedContentLoaded', () => {
         },
         {
             id: 'ORD002',
-            status: 'ENTREGUE',
+            status: 'EM PROCESSAMENTO',
             date: '2023-10-20',
             total: 75.00,
             items: [
@@ -45,7 +45,7 @@ document.addEventListener('sharedContentLoaded', () => {
                         <p class="card-text">Data: ${order.date}</p>
                         <p class="card-text">Total: R$ ${order.total.toFixed(2)}</p>
                         <button class="btn btn-sm btn-info me-2 view-order-details" data-order-id="${order.id}">Ver Detalhes</button>
-                        <button class="btn btn-sm btn-warning request-exchange" data-order-id="${order.id}" ${order.status === 'EM TROCA' ? 'disabled' : ''}>Realizar Troca/Devolução</button>
+                        <button class="btn btn-sm btn-warning request-exchange" data-order-id="${order.id}">Realizar Troca/Devolução</button>
                     </div>
                 `;
                 ordersListContainer.appendChild(orderCard);
@@ -90,7 +90,7 @@ document.addEventListener('sharedContentLoaded', () => {
                 const orderIndex = orders.findIndex(order => order.id === orderIdToExchange);
                 if (orderIndex !== -1) {
                     orders[orderIndex].status = 'EM TROCA';
-                    localStorage.setItem('orders', JSON.stringify(orders));
+                    // localStorage.setItem('orders', JSON.stringify(orders));
                     renderOrders(); // Re-renderiza a lista para refletir a mudança de status
                     showAlert(`Pedido #${orderIdToExchange} em troca.`, 'info');
                 }

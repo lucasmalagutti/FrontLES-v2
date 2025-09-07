@@ -15,26 +15,35 @@
         <div id="alertContainer" class="mt-3"></div>
         <form class="row g-3">
             <h1>Dados Pessoais</h1>
+
             <div class="col-md-5">
                 <label for="nome" class="form-label">Nome Completo</label>
                 <input class="form-control" type="text" id="nome" placeholder="Digite seu nome aqui">
             </div>
+
             <div class="col-md-3">
                 <label for="dataNascimento" class="form-label">Data Nascimento</label>
                 <input class="form-control" type="date" id="dataNascimento">
             </div>
+
             <div class="col-md-4">
                 <label for="cpf" class="form-label">CPF</label>
                 <input class="form-control" type="text" id="cpf" placeholder="000.000.000-00">
             </div>
+
             <div class="row justify-content-between">
                 <div class="col-md-3">
-                    <label for="genero" class="form-label">Genêro</label>
+                    <label for="genero" class="form-label">Gênero</label>
                     <select id="genero" class="form-select">
-                        <option selected>Selecione</option>
-                        <option>Masculino</option>
-                        <option>Feminino</option>
-                        <option>Outro</option>
+                        <option selected value="">Selecione</option>
+                        <option value="1">Masculino</option>
+                        <option value="2">Feminino</option>
+                        <option value="3">Não binário</option>
+                        <option value="4">Trans Masculino</option>
+                        <option value="5">Trans Feminino</option>
+                        <option value="6">Genêro fluido</option>
+                        <option value="7">Bigenêro</option>
+                        <option value="8">Outro</option>
                     </select>
                 </div>
                 <div class="col-md-6">
@@ -42,14 +51,14 @@
                     <input class="form-control" type="email" id="email" placeholder="emailexemplo@email.com">
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-3">
                     <label for="tipoTelefone" class="form-label">Tipo Telefone</label>
                     <select id="tipoTelefone" class="form-select">
-                        <option selected>Selecione</option>
-                        <option>Fixo</option>
-                        <option>Comercial</option>
-                        <option>Celular</option>
+                        <option selected value="">Selecione</option>
+                        <option value="1">Fixo</option>
+                        <option value="2">Celular</option>
                     </select>
                 </div>
                 <div class="col-md-1">
@@ -57,14 +66,16 @@
                     <input class="form-control" type="text" id="DDD" placeholder="00">
                 </div>
                 <div class="col-md-2">
-                    <label for="numeroTelefone" class="form-label">Numero Telefone</label>
+                    <label for="numeroTelefone" class="form-label">Número Telefone</label>
                     <input class="form-control" type="text" id="numeroTelefone" placeholder="00000-0000">
                 </div>
             </div>
+
             <div class="col-md-6">
                 <label for="senha" class="form-label">Senha</label>
                 <input type="password" class="form-control" id="senha" placeholder="Digite sua senha aqui">
             </div>
+
             <div class="col-6">
                 <label for="confirmarSenha" class="form-label">Confirmar Senha</label>
                 <input type="password" class="form-control" id="confirmarSenha" placeholder="Confirme sua senha aqui">
@@ -74,162 +85,192 @@
 
             <div class="col-md-6">
                 <label for="nomeEntrega" class="form-label">Nome do Endereço</label>
-                <input type="text" id="nomeEntrega" name="nomeEntrega" class="form-control" placeholder="ex: Trabalho, Casa da Mãe, etc.">
+                <input type="text" id="nomeEntrega" class="form-control" placeholder="ex: Trabalho, Casa da Mãe, etc.">
             </div>
+
             <div class="col-md-6">
                 <label for="tipoResidenciaEntrega" class="form-label">Tipo Residência</label>
                 <select id="tipoResidenciaEntrega" class="form-select">
-                    <option selected>Selecione</option>
-                    <option>Casa</option>
-                    <option>Apartamento</option>
-                    <option>Rural</option>
-                    <option>Outros</option>
+                    <option selected value="">Selecione</option>
+                    <option value="1">Casa</option>
+                    <option value="2">Apartamento</option>
+                    <option value="3">Comercial</option>
                 </select>
             </div>
-            
+
             <div class="col-md-6">
                 <label for="tipoLogradouroEntrega" class="form-label">Tipo Logradouro</label>
                 <select id="tipoLogradouroEntrega" class="form-select">
-                    <option selected>Selecione</option>
-                    <option>Rua</option>
-                    <option>Avenida</option>
-                    <option>Condomínio</option>
-                    <option>Travessa</option>
-                    <option>Estrada</option>
-                    <option>Praça</option>
-                    <option>Outros</option>
+                    <option selected value="">Selecione</option>
+                    <option value="1">Rua</option>
+                    <option value="2">Avenida</option>
+                    <option value="3">Alameda</option>
+                    <option value="4">Travessa</option>
+                    <option value="5">Praca</option>
+                    <option value="6">Estrada</option>
+                    <option value="7">Rodovia</option>
+                    <option value="8">Beco</option>
+                    <option value="9">Passarela</option>
+                    <option value="10">Chacara</option>
+                    <option value="11">Sitio</option>
+                    <option value="12">Outros</option>
                 </select>
             </div>
+
             <div class="col-md-6">
                 <label for="logradouroEntrega" class="form-label">Logradouro</label>
-                <input type="text" id="logradouroEntrega" name="logradouroEntrega" class="form-control" placeholder="Digite seu logradouro aqui">
+                <input type="text" id="logradouroEntrega" class="form-control" placeholder="Digite seu logradouro aqui">
             </div>
+
             <div class="col-md-2">
                 <label for="numeroEntrega" class="form-label">Número</label>
-                <input type="text" id="numeroEntrega" name="numeroEntrega" class="form-control" placeholder="Digite o número do seu logradouro aqui">
+                <input type="text" id="numeroEntrega" class="form-control" placeholder="Digite o número">
             </div>
+
             <div class="col-md-4">
                 <label for="cepEntrega" class="form-label">CEP</label>
-                <input type="text" id="cepEntrega" name="cepEntrega" class="form-control" placeholder="00000-000">
+                <input type="text" id="cepEntrega" class="form-control" placeholder="00000-000">
             </div>
+
             <div class="col-md-6">
                 <label for="bairroEntrega" class="form-label">Bairro</label>
-                <input type="text" id="bairroEntrega" name="bairroEntrega" class="form-control" placeholder="Digite seu bairro aqui">
+                <input type="text" id="bairroEntrega" class="form-control" placeholder="Digite seu bairro">
             </div>
+
             <div class="col-md-6">
                 <label for="cidadeEntrega" class="form-label">Cidade</label>
-                <input type="text" id="cidadeEntrega" name="cidadeEntrega" class="form-control" placeholder="Digite sua cidade aqui">
+                <input type="text" id="cidadeEntrega" class="form-control" placeholder="Digite sua cidade">
             </div>
+
             <div class="col-md-4">
                 <label for="estadoEntrega" class="form-label">Estado</label>
-                <input type="text" id="estadoEntrega" name="estadoEntrega" class="form-control" placeholder="Digite seu estado aqui">
+                <input type="text" id="estadoEntrega" class="form-control" placeholder="Digite seu estado">
             </div>
+
             <div class="col-md-2">
                 <label for="paisEntrega" class="form-label">País</label>
-                <input type="text" id="paisEntrega" name="paisEntrega" class="form-control" placeholder="Digite seu país aqui">
+                <input type="text" id="paisEntrega" class="form-control" placeholder="Digite seu país">
             </div>
 
             <h1>Endereço de Cobrança</h1>
+
             <div class="col-md-6">
                 <label for="nomeCobranca" class="form-label">Nome do Endereço</label>
-                <input type="text" id="nomeCobranca" name="nomeCobranca" class="form-control" placeholder="ex: Trabalho, Casa da Mãe, etc.">
+                <input type="text" id="nomeCobranca" class="form-control" placeholder="ex: Trabalho, Casa da Mãe, etc.">
             </div>
 
             <div class="col-md-6">
                 <label for="tipoResidenciaCobranca" class="form-label">Tipo Residência</label>
                 <select id="tipoResidenciaCobranca" class="form-select">
-                    <option selected>Selecione</option>
-                    <option>Casa</option>
-                    <option>Apartamento</option>
-                    <option>Rural</option>
-                    <option>Outros</option>
+                    <option selected value="">Selecione</option>
+                    <option value="1">Casa</option>
+                    <option value="2">Apartamento</option>
+                    <option value="3">Comercial</option>
                 </select>
             </div>
-            
+
             <div class="col-md-6">
                 <label for="tipoLogradouroCobranca" class="form-label">Tipo Logradouro</label>
                 <select id="tipoLogradouroCobranca" class="form-select">
-                    <option selected>Selecione</option>
-                    <option>Rua</option>
-                    <option>Avenida</option>
-                    <option>Condomínio</option>
-                    <option>Travessa</option>
-                    <option>Estrada</option>
-                    <option>Praça</option>
-                    <option>Outros</option>
+                    <option selected value="">Selecione</option>
+                    <option value="1">Rua</option>
+                    <option value="2">Avenida</option>
+                    <option value="3">Alameda</option>
+                    <option value="4">Travessa</option>
+                    <option value="5">Praca</option>
+                    <option value="6">Estrada</option>
+                    <option value="7">Rodovia</option>
+                    <option value="8">Beco</option>
+                    <option value="9">Passarela</option>
+                    <option value="10">Chacara</option>
+                    <option value="11">Sitio</option>
+                    <option value="12">Outros</option>
                 </select>
             </div>
+
             <div class="col-md-6">
                 <label for="logradouroCobranca" class="form-label">Logradouro</label>
-                <input type="text" id="logradouroCobranca" name="logradouroCobranca" class="form-control" placeholder="Digite seu logradouro aqui">
+                <input type="text" id="logradouroCobranca" class="form-control" placeholder="Digite seu logradouro">
             </div>
+
             <div class="col-md-2">
                 <label for="numeroCobranca" class="form-label">Número</label>
-                <input type="text" id="numeroCobranca" name="numeroCobranca" class="form-control" placeholder="Digite o número do seu logradouro aqui">
+                <input type="text" id="numeroCobranca" class="form-control" placeholder="Digite o número">
             </div>
+
             <div class="col-md-4">
                 <label for="cepCobranca" class="form-label">CEP</label>
-                <input type="text" id="cepCobranca" name="cepCobranca" class="form-control" placeholder="00000-000">
+                <input type="text" id="cepCobranca" class="form-control" placeholder="00000-000">
             </div>
+
             <div class="col-md-6">
                 <label for="bairroCobranca" class="form-label">Bairro</label>
-                <input type="text" id="bairroCobranca" name="bairroCobranca" class="form-control" placeholder="Digite seu bairro aqui">
+                <input type="text" id="bairroCobranca" class="form-control" placeholder="Digite seu bairro">
             </div>
+
             <div class="col-md-6">
                 <label for="cidadeCobranca" class="form-label">Cidade</label>
-                <input type="text" id="cidadeCobranca" name="cidadeCobranca" class="form-control" placeholder="Digite sua cidade aqui">
+                <input type="text" id="cidadeCobranca" class="form-control" placeholder="Digite sua cidade">
             </div>
+
             <div class="col-md-4">
                 <label for="estadoCobranca" class="form-label">Estado</label>
-                <input type="text" id="estadoCobranca" name="estadoCobranca" class="form-control" placeholder="Digite seu estado aqui">
+                <input type="text" id="estadoCobranca" class="form-control" placeholder="Digite seu estado">
             </div>
+
             <div class="col-md-2">
                 <label for="paisCobranca" class="form-label">País</label>
-                <input type="text" id="paisCobranca" name="paisCobranca" class="form-control" placeholder="Digite seu país aqui">
+                <input type="text" id="paisCobranca" class="form-control" placeholder="Digite seu país">
             </div>
 
             <h1>Cartão de Crédito</h1>
 
             <div class="col-md-6">
                 <label for="numeroCartao" class="form-label">Número do Cartão</label>
-                <input type="text" id="numeroCartao" name="numeroCartao" class="form-control" placeholder="0000.0000.0000.0000">
+                <input type="text" id="numeroCartao" class="form-control" placeholder="0000.0000.0000.0000">
             </div>
+
             <div class="col-md-3">
                 <label for="cvv" class="form-label">CVV</label>
-                <input type="text" id="cvv" name="cvv" class="form-control" placeholder="000"><br>
+                <input type="text" id="cvv" class="form-control" placeholder="000"><br>
             </div>
+
             <div class="col-md-6">
                 <label for="nomeImpresso" class="form-label">Nome Impresso</label>
-                <input type="text" id="nomeImpresso" name="nomeImpresso" class="form-control" placeholder="Digite nome completo impresso no cartão aqui">
+                <input type="text" id="nomeImpresso" class="form-control"
+                    placeholder="Nome completo impresso no cartão">
             </div>
+
             <div class="col-md-6">
                 <label for="bandeira" class="form-label">Bandeira</label>
-                <select id="bandeira" name="bandeira" class="form-select">
-                    <option selected>Selecione</option>
-                    <option>Visa</option>
-                    <option>MasterCard</option>
-                    <option>American Express</option>
-                    <option>Elo</option>
-                    <option>HiperCard</option>
-                    <option>Aura</option>
+                <select id="bandeira" class="form-select">
+                    <option selected value="">Selecione</option>
+                    <option value="1">Visa</option>
+                    <option value="2">MasterCard</option>
+                    <option value="3">American Express</option>
+                    <option value="4">Elo</option>
+                    <option value="5">HiperCard</option>
+                    <option value="6">Aura</option>
                 </select>
             </div>
+
             <div class="col-12 row mt-3">
                 <div class="col-auto">
                     <button type="button" class="btn btn-primary me-2" id="salvarCliente">Salvar</button>
                 </div>
                 <div class="col-auto">
                     <button type="button" class="btn btn-danger" id="cancelarCliente">Cancelar</button>
-            </div>
+                </div>
             </div>
         </form>
     </div>
-    
-    <script src="js/script.js"></script>
+
+
+    <script src="js/cadastrarCliente.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
-    
+
 </body>
 
 </html>
