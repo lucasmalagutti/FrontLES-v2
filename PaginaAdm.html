@@ -22,7 +22,7 @@
                 <button class="btn btn-primary">Atualizar Lista</button>
             </div>
         </header>
-        
+
         <a href="example.html">voltar</a>
 
         <div class="row mb-3">
@@ -61,7 +61,7 @@
             </form>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive mt-3">
             <table class="table table-hover align-middle table-bordered">
                 <thead>
                     <tr>
@@ -69,51 +69,25 @@
                         <th scope="col">CPF</th>
                         <th scope="col">Email</th>
                         <th scope="col">Gênero</th>
+                        <th scope="col">Dt Nasc</th>
                         <th scope="col">DDD</th>
                         <th scope="col">Telefone</th>
                         <th scope="col">Tipo Telefone</th>
-                        <th scope="col">Visualizar Endereços</th>
-                        <th scope="col">Visualizar Cartões</th>
+                        <th scope="col">Endereços</th>
+                        <th scope="col">Cartões</th>
                         <th scope="col">Transações</th>
                         <th scope="col">Status</th>
                         <th scope="col">Ações</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>Luiz Eduardo</td>
-                        <td>29932381080</td>
-                        <td>luizeduardo@gmail.com</td>
-                        <td>Masculino</td>
-                        <td>11</td>
-                        <td>965425853</td>
-                        <td>Celular</td>
-                        <td><button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#enderecosModal">Visualizar Endereços</button></td>
-                        <td><button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#cartoesModal">Visualizar Cartões</button></td>
-                        <td><button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#transacoesModal">Visualizar Transações</button></td>
-                        <td><span class="badge bg-danger">Inativo</span></td>
-                        <td>
-                            <div class="row d-flex flex-wrap gap-2">
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#editarDadosModal">Editar Dados</button>
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#addEnderecoModal">Adicionar Endereço</button>
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#addCartaoModal">Adicionar Cartão</button>
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#editarSenhaModal">Editar Senha</button>
-                                <button class="btn btn-danger btn-sm" id="inativarBtn">Inativar</button>
-                            </div>
-                        </td>
-                    </tr>
+                <tbody id="clientesTableBody">
+
                 </tbody>
             </table>
         </div>
     </div>
 
+    <script src="js/cliente/listarDadosCliente.js"></script>
     <script src="js/script.js"></script>
     <script src="js/passwordToggle.js"></script> <!-- Funcionalidade de mostrar/ocultar senha -->
     <script src="js/loadPagAdmModals.js"></script>
