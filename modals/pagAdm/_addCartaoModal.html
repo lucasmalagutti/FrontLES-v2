@@ -1,4 +1,4 @@
-<div class="modal fade" id="addCartaoModal" tabindex="-1" aria-labelledby="addCartaoModalLabel" aria-hidden="true">
+<div class="modal fade" id="addCartaoModal" data-cliente-id="${clienteId}" tabindex="-1" aria-labelledby="addCartaoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -24,13 +24,13 @@
                     <div class="col-md-6">
                         <label for="addCartaoBandeira" class="form-label">Bandeira</label>
                         <select id="addCartaoBandeira" name="bandeira" class="form-select">
-                            <option selected>Selecione</option>
-                            <option>Visa</option>
-                            <option>MasterCard</option>
-                            <option>American Express</option>
-                            <option>Elo</option>
-                            <option>HiperCard</option>
-                            <option>Aura</option>
+                            <option value="">Selecione</option>
+                            <option value="0">Visa</option>
+                            <option value="1">MasterCard</option>
+                            <option value="2">American Express</option>
+                            <option value="3">Elo</option>
+                            <option value="4">HiperCard</option>
+                            <option value="5">Aura</option>
                         </select>
                     </div>
                 </form>

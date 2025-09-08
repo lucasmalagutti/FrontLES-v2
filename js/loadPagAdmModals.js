@@ -1,4 +1,4 @@
-// js/loadPagAdmModals.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const modalsToLoad = [
         'modals/pagAdm/_enderecosModal.html',
@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 const parser = new DOMParser();
                 const modalDoc = parser.parseFromString(data, 'text/html');
-                // Adiciona o primeiro div encontrado no documento, que deve ser o modal
                 const modalContent = modalDoc.body.firstChild;
 
                 if (modalContent) {

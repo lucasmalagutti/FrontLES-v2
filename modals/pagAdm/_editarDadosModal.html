@@ -1,5 +1,4 @@
-<div class="modal fade" id="editarDadosModal" tabindex="-1" aria-labelledby="editarDadosModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="editarDadosModal" tabindex="-1" aria-labelledby="editarDadosModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -13,29 +12,37 @@
                         <input type="text" class="form-control" id="editNomeCompleto" placeholder="Nome Completo">
                     </div>
                     <div class="col-md-6">
+                        <label for="editCpf" class="form-label">CPF</label>
+                        <input type="text" class="form-control" id="editCpf" placeholder="000.000.000-00">
+                    </div>
+                    <div class="col-md-6">
                         <label for="editDataNascimento" class="form-label">Data Nascimento</label>
                         <input type="date" class="form-control" id="editDataNascimento">
                     </div>
                     <div class="col-md-6">
                         <label for="editGenero" class="form-label">Gênero</label>
                         <select id="editGenero" class="form-select">
-                            <option selected>Selecione</option>
-                            <option>Masculino</option>
-                            <option>Feminino</option>
-                            <option>Outro</option>
+                            <option value="">Selecione</option>
+                            <option value="1">Cis Masculino</option>
+                            <option value="2">Cis Feminino</option>
+                            <option value="3">Não Binário</option>
+                            <option value="4">Trans Masculino</option>
+                            <option value="5">Trans Feminino</option>
+                            <option value="6">Gênero Fluido</option>
+                            <option value="7">Bigênero</option>
+                            <option value="8">Outro</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label for="editEmail" class="form-label">Email</label>
                         <input type="email" class="form-control" id="editEmail" placeholder="example@email.com">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label for="editTipoTelefone" class="form-label">Tipo Telefone</label>
                         <select id="editTipoTelefone" class="form-select">
-                            <option selected>Selecione</option>
-                            <option>Fixo</option>
-                            <option>Comercial</option>
-                            <option>Celular</option>
+                            <option value="">Selecione</option>
+                            <option value="1">Fixo</option>
+                            <option value="2">Celular</option>
                         </select>
                     </div>
                     <div class="col-md-2">
