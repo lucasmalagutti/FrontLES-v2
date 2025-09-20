@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('https://localhost:7280/Cadastrar/Cliente', {
+                const response = await fetch('https://localhost:7280/Cliente/Cadastrar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
