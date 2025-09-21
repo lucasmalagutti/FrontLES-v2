@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <main class="profile-main container my-5">
         <section class="profile-section card p-4 shadow-sm">
@@ -18,7 +20,8 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h2 class="h5 mb-0">Dados Pessoais</h2>
-                            <button id="edit-personal-data-btn" class="btn btn-sm btn-outline-primary">Editar Dados</button>
+                            <button id="edit-personal-data-btn" class="btn btn-sm btn-outline-primary">Editar
+                                Dados</button>
                         </div>
                         <div class="card-body" id="personal-data-container">
                             <p>Nome: <span id="profile-name"></span></p>
@@ -34,7 +37,8 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h2 class="h5 mb-0">Endereços Salvos</h2>
-                            <button id="add-new-address-btn" class="btn btn-sm btn-outline-success">Adicionar Novo Endereço</button>
+                            <button id="add-new-address-btn" class="btn btn-sm btn-outline-success">Adicionar Novo
+                                Endereço</button>
                         </div>
                         <div class="card-body" id="saved-addresses-container">
                             <p class="text-muted">Nenhum endereço salvo.</p>
@@ -46,7 +50,8 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h2 class="h5 mb-0">Cartões de Crédito Salvos</h2>
-                            <button id="add-new-card-btn" class="btn btn-sm btn-outline-success">Adicionar Novo Cartão</button>
+                            <button id="add-new-card-btn" class="btn btn-sm btn-outline-success">Adicionar Novo
+                                Cartão</button>
                         </div>
                         <div class="card-body" id="saved-cards-container">
                             <p class="text-muted">Nenhum cartão salvo.</p>
@@ -67,16 +72,21 @@
                                     <i class="bi bi-eye" id="iconSenhaPerfil"></i>
                                 </button>
 
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
         </section>
     </main>
 
+    <script src="js/script.js"></script>
+    <script src="js/passwordToggle.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/endereco/addEndereco.js"></script>
+    <script src="js/cliente/editarCliente.js"></script>
+    <script src="js/cliente/editarSenha.js"></script>
+    <script src="js/cartao/addCartao.js"></script>
     <script src="js/loadShared.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/script.js"></script>
-    <script src="js/passwordToggle.js"></script> <!-- Funcionalidade de mostrar/ocultar senha -->
-    <script src="js/profile.js"></script> <!-- Novo arquivo JS para a lógica do perfil -->
 </body>
+
 </html>
