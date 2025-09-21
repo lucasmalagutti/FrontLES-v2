@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (salvarClienteBtn) {
         salvarClienteBtn.addEventListener('click', async () => {
-            // Monta o JSON no formato ClienteDTO
             const clienteDTO = {
                 Id: 0,
                 Nome: document.getElementById('nome').value,
@@ -51,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         Id: 0,
                         Nome: document.getElementById('nomeCobranca').value,
-                        TipoEndereco: 1, // Cobrança
+                        TipoEndereco: 1, 
                         TipoResidencia: parseInt(document.getElementById('tipoResidenciaCobranca').value),
                         TipoLogradouro: parseInt(document.getElementById('tipoLogradouroCobranca').value),
                         Logradouro: document.getElementById('logradouroCobranca').value,

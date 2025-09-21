@@ -25,41 +25,40 @@
 
         <a href="example.html">voltar</a>
 
-        <div class="row mb-3">
-            <form class="row g-3">
-                <div class="col-md-3">
-                    <input type="text" class="form-control" placeholder="Filtrar por Nome">
-                </div>
-                <div class="col-md-3">
-                    <input type="text" class="form-control" placeholder="Filtrar por CPF">
-                </div>
-                <div class="col-md-3">
-                    <input type="email" class="form-control" placeholder="Filtrar por Email">
-                </div>
-                <div class="col-md-3">
-                    <input type="tel" class="form-control" placeholder="Filtrar por Telefone">
-                </div>
-                <div class="col-md-3">
-                    <select name="tipo_telefone" class="form-select">
-                        <option value="">Tipo Telefone</option>
-                        <option value="celular">Celular</option>
-                        <option value="fixo">Fixo</option>
-                        <option value="comercial">Comercial</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select">
-                        <option value="">Status</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="inativo">Inativo</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                    <button type="reset" class="btn btn-secondary">Limpar</button>
-                </div>
-            </form>
-        </div>
+        <form id="formBusca" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="nome" placeholder="Filtrar por Nome">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="cpf" placeholder="Filtrar por CPF">
+            </div>
+            <div class="col-md-3">
+                <input type="email" class="form-control" name="email" placeholder="Filtrar por Email">
+            </div>
+            <div class="col-md-3">
+                <input type="tel" class="form-control" name="telefone" placeholder="Filtrar por Telefone">
+            </div>
+            <div class="col-md-3">
+                <select name="tipoTelefone" class="form-select">
+                    <option value="">Tipo Telefone</option>
+                    <option value="celular">Celular</option>
+                    <option value="fixo">Fixo</option>
+                    <option value="comercial">Comercial</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">Status</option>
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                <button type="reset" class="btn btn-secondary">Limpar</button>
+            </div>
+        </form>
+
 
         <div class="table-responsive mt-3">
             <table class="table table-hover align-middle table-bordered">
@@ -86,7 +85,6 @@
             </table>
         </div>
     </div>
-
 
 
     <script src="js/cliente/editarSenha.js"></script>
