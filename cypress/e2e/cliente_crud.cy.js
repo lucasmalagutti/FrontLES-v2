@@ -75,9 +75,11 @@ describe('CRUD de Cliente', () => {
 
       // Preenche os campos do modal de edição com novos dados
       cy.get('#editNomeCompleto').should('exist').and('be.visible').and('not.be.disabled').clear();
+      cy.wait(500); // Adiciona um pequeno delay após o clear
       cy.get('#editNomeCompleto').should('exist').and('be.visible').and('not.be.disabled').type('Malagueta Editado');
 
       cy.get('#editCpf').should('exist').and('be.visible').and('not.be.disabled').clear();
+      cy.wait(500); // Adiciona um pequeno delay após o clear
       cy.get('#editCpf').should('exist').and('be.visible').and('not.be.disabled').type('11122233344'); // Novo CPF
 
       cy.get('#editDataNascimento').should('exist').and('be.visible').and('not.be.disabled').type('1995-05-05'); // Nova data de nascimento
@@ -85,14 +87,17 @@ describe('CRUD de Cliente', () => {
       cy.get('#editGenero').should('exist').and('be.visible').and('not.be.disabled').select('Cis Feminino'); // Novo gênero
 
       cy.get('#editEmail').should('exist').and('be.visible').and('not.be.disabled').clear();
+      cy.wait(500); // Adiciona um pequeno delay após o clear
       cy.get('#editEmail').should('exist').and('be.visible').and('not.be.disabled').type('malagueta.editado@gmail.com');
 
       cy.get('#editTipoTelefone').should('exist').and('be.visible').and('not.be.disabled').select('Fixo');
 
       cy.get('#editDdd').should('exist').and('be.visible').and('not.be.disabled').clear();
+      cy.wait(500); // Adiciona um pequeno delay após o clear
       cy.get('#editDdd').should('exist').and('be.visible').and('not.be.disabled').type('21');
 
       cy.get('#editNumeroTelefone').should('exist').and('be.visible').and('not.be.disabled').clear();
+      cy.wait(500); // Adiciona um pequeno delay após o clear
       cy.get('#editNumeroTelefone').should('exist').and('be.visible').and('not.be.disabled').type('88888-8888');
 
       // Clica no botão para salvar as alterações
