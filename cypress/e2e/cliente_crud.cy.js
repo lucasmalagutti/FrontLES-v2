@@ -11,7 +11,7 @@ describe('CRUD de Cliente', () => {
       // Preenche os dados pessoais
       cy.get('#nome').type('Malagueta');
       cy.get('#dataNascimento').type('1990-01-01');
-      cy.get('#cpf').type('44554588888');
+      cy.get('#cpf').type('44554581888');
       cy.get('#genero').select('Masculino');
       cy.get('#email').type('malagueta@gmail.com');
       cy.get('#tipoTelefone').select('Celular');
@@ -58,7 +58,7 @@ describe('CRUD de Cliente', () => {
       // Verifica se o cliente foi cadastrado e aparece na lista
       cy.visit('PaginaAdm.html'); // Volta para a página de administração
 
-      cy.get('#cpf').type('44554588888');
+      cy.get('#cpf').type('44554581888');
       cy.get('#filtrar').click();
       cy.get('#clientesTableBody').should('contain', 'Malagueta');
   });
