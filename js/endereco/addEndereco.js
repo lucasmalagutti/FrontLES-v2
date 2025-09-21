@@ -38,7 +38,7 @@
             }
 
             const data = await response.json();
-            alert(data.message);
+            showAlert(data.message);
             // Fechar o modal após o sucesso
             const addEnderecoModal = bootstrap.Modal.getInstance(document.getElementById('addEnderecoModal'));
             if (addEnderecoModal) {

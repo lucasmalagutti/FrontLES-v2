@@ -87,10 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 1500);
                 } else {
                     const errorData = await response.json();
-                    showAlert('Erro ao salvar: ' + (errorData.message || 'Verifique os dados'), 'danger');
+                    showAlert('Erro ao salvar: ' + (errorData.message), 'danger');
                 }
             } catch (error) {
-                showAlert('Erro na conexão com o servidor: ' + error.message, 'danger');
+                showAlert('Erro na conexão com o servidor', 'danger');
             }
         });
     }

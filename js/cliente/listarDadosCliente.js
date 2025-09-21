@@ -84,14 +84,14 @@ function renderClientes(clientes) {
             <td>${tipoTelefoneTexto}</td>
             <td><button class="btn btn-primary btn-sm visualizar-enderecos-btn" data-cliente-id="${cliente.id}" data-bs-toggle="modal" data-bs-target="#enderecosModal">Visualizar Endereços</button></td>
             <td><button class="btn btn-primary btn-sm visualizar-cartoes-btn" data-cliente-id="${cliente.id}" data-bs-toggle="modal" data-bs-target="#cartoesModal">Visualizar Cartões</button></td>
-            <td><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#transacoesModal">Visualizar Transações</button></td>
+            <td><button class="btn btn-primary btn-sm visualizar-transacoes-btn" data-bs-toggle="modal" data-bs-target="#transacoesModal">Visualizar Transações</button></td>
             <td>${statusBadge}</td>
             <td>
                 <div class="row d-flex flex-wrap gap-2">
                     <button class="btn btn-primary btn-sm editar-dados-btn" data-bs-toggle="modal" data-cliente-id="${cliente.id}" data-bs-target="#editarDadosModal">Editar Dados</button>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-cliente-id="${cliente.id}" data-bs-target="#addEnderecoModal">Adicionar Endereço</button>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-cliente-id="${cliente.id}" data-bs-target="#addCartaoModal">Adicionar Cartão</button>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-cliente-id="${cliente.id}" data-bs-target="#editarSenhaModal">Editar Senha</button>
+                    <button class="btn btn-primary btn-sm add-endereco-btn" data-bs-toggle="modal" data-cliente-id="${cliente.id}" data-bs-target="#addEnderecoModal">Adicionar Endereço</button>
+                    <button class="btn btn-primary btn-sm add-cartao-btn" data-bs-toggle="modal" data-cliente-id="${cliente.id}" data-bs-target="#addCartaoModal">Adicionar Cartão</button>
+                    <button class="btn btn-primary btn-sm editar-senha-btn" data-bs-toggle="modal" data-cliente-id="${cliente.id}" data-bs-target="#editarSenhaModal">Editar Senha</button>
                     <button class="btn btn-danger btn-sm inativar-cliente-btn" data-cliente-id="${cliente.id}">Inativar</button>
                 </div>
             </td>
@@ -100,3 +100,45 @@ function renderClientes(clientes) {
         tbody.appendChild(tr);
     });
 }
+
+// Add event delegation for inativar-cliente-btn outside the loop
+document.addEventListener('click', async function(event) {
+    if (event.target.classList.contains('inativar-cliente-btn')) {
+        const clienteId = event.target.dataset.clienteId;
+        if (clienteId && window.inativarCliente) {
+            await window.inativarCliente(clienteId);
+        }
+    }
+
+    if (event.target.classList.contains('add-endereco-btn')) {
+        const clienteId = event.target.dataset.clienteId;
+        const addEnderecoModal = document.getElementById('addEnderecoModal');
+        if (addEnderecoModal && clienteId) {
+            addEnderecoModal.setAttribute('data-cliente-id', clienteId);
+        }
+    }
+
+    if (event.target.classList.contains('editar-dados-btn')) {
+        const clienteId = event.target.dataset.clienteId;
+        const editarDadosModal = document.getElementById('editarDadosModal');
+        if (editarDadosModal && clienteId) {
+            editarDadosModal.setAttribute('data-cliente-id', clienteId);
+        }
+    }
+
+    if (event.target.classList.contains('add-cartao-btn')) {
+        const clienteId = event.target.dataset.clienteId;
+        const addCartaoModal = document.getElementById('addCartaoModal');
+        if (addCartaoModal && clienteId) {
+            addCartaoModal.setAttribute('data-cliente-id', clienteId);
+        }
+    }
+
+    if (event.target.classList.contains('editar-senha-btn')) {
+        const clienteId = event.target.dataset.clienteId;
+        const editarSenhaModal = document.getElementById('editarSenhaModal');
+        if (editarSenhaModal && clienteId) {
+            editarSenhaModal.setAttribute('data-cliente-id', clienteId);
+        }
+    }
+});
