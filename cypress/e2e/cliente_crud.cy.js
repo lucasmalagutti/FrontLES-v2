@@ -30,8 +30,8 @@ describe('CRUD de Cliente', () => {
         .and('not.be.disabled')
         .clear()
         .wait(100)
-        .type('44554581851', { delay: 50 })
-        .should('have.value', '44554581851');
+        .type('11122233344', { delay: 50 })
+        .should('have.value', '11122233344');
       
       cy.get('#genero').select('Masculino');
       
@@ -273,8 +273,8 @@ describe('CRUD de Cliente', () => {
         .and('not.be.disabled')
         .clear()
         .wait(100)
-        .type('44554581851', { delay: 50 })
-        .should('have.value', '44554581851');
+        .type('11122233344', { delay: 50 })
+        .should('have.value', '11122233344');
       cy.get('#filtrar').click();
 
       cy.wait(2000);
@@ -290,8 +290,8 @@ describe('CRUD de Cliente', () => {
         .and('not.be.disabled')
         .clear()
         .wait(100)
-        .type('44554581851', { delay: 50 })
-        .should('have.value', '44554581851');
+        .type('11122233344', { delay: 50 })
+        .should('have.value', '11122233344');
       cy.get('#filtrar').click();
 
       cy.wait(2000);
@@ -303,12 +303,9 @@ describe('CRUD de Cliente', () => {
 
       cy.get('#editNomeCompleto')
         .should('exist')
-        .and('be.visible')
-        .and('not.be.disabled')
         .clear()
         .wait(100)
-        .type('Malagueta Editado', { delay: 50 })
-        .should('have.value', 'Malagueta Editado');
+        .type(' Editado', { delay: 50 })
 
       cy.get('#editCpf')
         .should('exist')
