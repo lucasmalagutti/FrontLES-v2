@@ -1,3 +1,4 @@
+import { carregarProdutos } from './productData.js';
 // Funcionalidades de busca - usa produtos definidos em productData.js
 
 function realizarBusca(event) {
@@ -17,7 +18,8 @@ function realizarBusca(event) {
     return false;
 }
 
-function exibirResultados() {
+async function exibirResultados() {
+    const produtos = await carregarProdutos(); // Carrega os produtos antes de exibir os resultados
     const urlParams = new URLSearchParams(window.location.search);
     const termoBusca = urlParams.get('q');
     
@@ -79,8 +81,9 @@ function renderizarProdutos(produtosParaExibir) {
     }
 }
 
-function buscarEmTempoReal(termo) {
+async function buscarEmTempoReal(termo) {
     if (termo.length < 2) return [];
+    const produtos = await carregarProdutos(); // Garante que os produtos estejam carregados antes de buscar em tempo real
     
     return produtos.filter(produto => 
         produto.nome.toLowerCase().includes(termo.toLowerCase()) ||

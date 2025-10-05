@@ -1,3 +1,5 @@
+import { carregarProdutos } from './productData.js';
+
 function showAlert(message, type) {
     const alertContainer = document.getElementById('alertContainer');
     if (!alertContainer) {
@@ -91,7 +93,7 @@ function renderCart() {
     }
 }
 
-function initializeCartFunctionality() {
+export function initializeCartFunctionality() {
     const cartItemsContainer = document.getElementById('cart-items-container');
     const clearCartBtn = document.getElementById('clear-cart-btn');
     const checkoutBtn = document.getElementById('checkout-btn');
@@ -202,8 +204,45 @@ function initializeCartFunctionality() {
     renderCart();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  
+function renderizarProdutosEmDestaque(produtosParaExibir) {
+    const futebolGrid = document.querySelector('#futebol .row');
+    const basqueteGrid = document.querySelector('#basquete .row');
+
+    if (futebolGrid) futebolGrid.innerHTML = '';
+    if (basqueteGrid) basqueteGrid.innerHTML = '';
+
+    produtosParaExibir.forEach(produto => {
+        const produtoHTML = `
+            <div class="col">
+                <div class="card h-100 shadow-sm product-card">
+                    <img src="${produto.imagem}" class="card-img-top" alt="${produto.alt}">
+                    <div class="card-body">
+                        <h5 class="card-title">${produto.nome}</h5>
+                        <p class="card-text">${produto.descricao}</p>
+                        <p class="fw-bold fs-5">R$ ${produto.preco.toFixed(2)}</p>
+                        <div class="d-flex justify-content-center align-items-center mb-2">
+                                <button class="btn btn-sm btn-outline-secondary decrease-product-quantity" data-product-id="${produto.id}">-</button>
+                                <span class="mx-2 product-quantity-display" data-product-id="${produto.id}">1</span>
+                                <button class="btn btn-sm btn-outline-secondary increase-product-quantity" data-product-id="${produto.id}">+</button>
+                            </div>
+                        <a href="#" class="btn btn-comprar w-100 add-to-cart" data-product-id="${produto.id}" data-product-name="${produto.nome}" data-product-price="${produto.preco}" data-product-image="${produto.imagem}">Comprar</a>
+                    </div>
+                </div>
+            </div>
+        `;
+        if (produto.categoria.toLowerCase() === 'futebol' && futebolGrid) {
+            futebolGrid.innerHTML += produtoHTML;
+        } else if (produto.categoria.toLowerCase() === 'basquete' && basqueteGrid) {
+            basqueteGrid.innerHTML += produtoHTML;
+        }
+    });
+    initializeCartFunctionality();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const produtosCarregados = await carregarProdutos(); // Carrega os produtos antes de renderizar
+    renderizarProdutosEmDestaque(produtosCarregados);
+    
     const urlParams = new URLSearchParams(window.location.search);
     const orderStatus = urlParams.get('order');
 
