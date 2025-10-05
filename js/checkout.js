@@ -1,6 +1,26 @@
-document.addEventListener('sharedContentLoaded', () => {
-    // Simulação de dados de carrinho, endereços e cartões
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+document.addEventListener('sharedContentLoaded', async () => {
+    // Limpar localStorage do carrinho para evitar dados antigos
+    localStorage.removeItem('cart');
+    
+    // Carregar carrinho do backend (ClienteID 33 para testes)
+    let cart = []; // Sempre iniciar vazio
+    try {
+        // Para testes, sempre usar backend com ClienteID 33
+        if (window.carrinhoService) {
+            const carrinhoBackend = await window.carrinhoService.obterCarrinho();
+            cart = carrinhoBackend.itens.map(item => ({
+                id: item.produtoId,
+                name: item.nomeProduto,
+                price: item.precoUnitario,
+                quantity: item.quantidade,
+                image: item.imagemProduto
+            }));
+        }
+        // Se não conseguir carregar do backend, manter vazio
+    } catch (error) {
+        console.error('Erro ao carregar carrinho:', error);
+        // Manter carrinho vazio se não conseguir carregar do backend
+    }
     let savedAddresses = JSON.parse(localStorage.getItem('savedAddresses')) || [
         { id: '1', street: 'Rua Exemplo, 123', city: 'São Paulo', state: 'SP', zip: '01000-000' },
         { id: '2', street: 'Av. Principal, 456', city: 'Rio de Janeiro', state: 'RJ', zip: '20000-000' }
@@ -300,13 +320,25 @@ document.addEventListener('sharedContentLoaded', () => {
         }
     });
 
-    placeOrderBtn.addEventListener('click', () => {
+    placeOrderBtn.addEventListener('click', async () => {
         if (selectedAddress && selectedCard) {
-            alert('Compra efetuada!');
-            localStorage.removeItem('cart'); // Limpar carrinho após a compra
-            setTimeout(() => {
-                window.location.href = 'index.html?order=success';
-            }, 1000);
+            try {
+                // Para testes, sempre usar backend com ClienteID 33
+                if (window.carrinhoService) {
+                    await window.carrinhoService.finalizarCarrinho();
+                } else {
+                    // Limpar carrinho local se não estiver logado
+                    localStorage.removeItem('cart');
+                }
+                
+                alert('Compra efetuada!');
+                setTimeout(() => {
+                    window.location.href = 'index.html?order=success';
+                }, 1000);
+            } catch (error) {
+                console.error('Erro ao finalizar pedido:', error);
+                alert('Erro ao finalizar pedido. Tente novamente.');
+            }
         } else {
             alert('Por favor, selecione um endereço de entrega e um método de pagamento.');
         }
