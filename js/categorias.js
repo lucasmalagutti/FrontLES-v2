@@ -1,5 +1,5 @@
 import { carregarProdutos } from './productData.js';
-import { initializeCartFunctionality } from '../script.js';
+import { initializeCartFunctionality } from './script.js';
 
 async function renderizarProdutosCategoria(categoria) {
     const produtos = await carregarProdutos(); // 🔹 usa o retorno direto da função
