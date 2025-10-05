@@ -1,16 +1,11 @@
-// Serviço para gerenciar carrinho no backend
 class CarrinhoService {
     constructor() {
-        this.baseUrl = 'https://localhost:7280/api/Carrinho'; // Ajuste conforme sua URL do backend
+        this.baseUrl = 'https://localhost:7280/api/Carrinho'; 
         this.clienteId = this.obterClienteId();
     }
 
     obterClienteId() {
-        // Para testes, usar ClienteID 33 fixo
-        // Quando implementar login, substituir por:
-        // const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
-        // return clienteLogado ? clienteLogado.id : null;
-        return 33;
+        return 15;
     }
 
     async obterCarrinho() {

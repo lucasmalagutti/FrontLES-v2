@@ -21,24 +21,58 @@ document.addEventListener('sharedContentLoaded', async () => {
         console.error('Erro ao carregar carrinho:', error);
         // Manter carrinho vazio se não conseguir carregar do backend
     }
-    let savedAddresses = JSON.parse(localStorage.getItem('savedAddresses')) || [
-        { id: '1', street: 'Rua Exemplo, 123', city: 'São Paulo', state: 'SP', zip: '01000-000' },
-        { id: '2', street: 'Av. Principal, 456', city: 'Rio de Janeiro', state: 'RJ', zip: '20000-000' }
-    ];
-    let savedCards = JSON.parse(localStorage.getItem('savedCards')) || [
-        { id: '1', last4: '1234', brand: 'Visa' },
-        { id: '2', last4: '5678', brand: 'Mastercard' }
-    ];
+
+    // Declarar os contêineres e botões no início para evitar ReferenceError
+    const savedAddressesContainer = document.getElementById('saved-addresses');
+    const addAddressBtn = document.getElementById('add-address-btn');
+    const savedCardsContainer = document.getElementById('saved-cards');
+    const addCardBtn = document.getElementById('add-card-btn');
+
+    // Variáveis para armazenar endereços e cartões carregados da API
+    let addresses = [];
+    let cards = [];
 
     let selectedAddress = null;
     let selectedCard = null;
     let appliedCoupons = []; // Array para múltiplos cupons
     let couponDiscount = 0;
 
-    const savedAddressesContainer = document.getElementById('saved-addresses');
-    const addAddressBtn = document.getElementById('add-address-btn');
-    const savedCardsContainer = document.getElementById('saved-cards');
-    const addCardBtn = document.getElementById('add-card-btn');
+    const CLIENT_ID = 15; // ID do cliente para testes
+
+    async function fetchAddresses(clientId) {
+        try {
+            const response = await fetch(`https://localhost:7280/Endereco/Listar/${clientId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            addresses = await response.json();
+            console.log('Endereços carregados da API:', addresses);
+            renderAddresses(); // Renderiza os endereços após o carregamento
+        } catch (error) {
+            console.error('Erro ao carregar endereços da API:', error);
+            addresses = []; // Garante que a lista de endereços esteja vazia em caso de erro
+        }
+    }
+
+    async function fetchCards(clientId) {
+        try {
+            const response = await fetch(`https://localhost:7280/Cartao/Listar/${clientId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            cards = await response.json();
+            console.log('Cartões carregados da API:', cards);
+            renderCards(); // Renderiza os cartões após o carregamento
+        } catch (error) {
+            console.error('Erro ao carregar cartões da API:', error);
+            cards = []; // Garante que a lista de cartões esteja vazia em caso de erro
+        }
+    }
+
+    // Chamar as funções de carregamento na inicialização
+    await fetchAddresses(CLIENT_ID);
+    await fetchCards(CLIENT_ID);
+
     const couponInput = document.getElementById('coupon-input');
     const applyCouponBtn = document.getElementById('apply-coupon-btn');
     const appliedCouponsContainer = document.getElementById('applied-coupons');
@@ -96,17 +130,17 @@ document.addEventListener('sharedContentLoaded', async () => {
     }
 
     function renderAddresses() {
-        if (savedAddresses.length === 0) {
+        if (addresses.length === 0) {
             savedAddressesContainer.innerHTML = '<p class="text-muted">Nenhum endereço salvo. Por favor, adicione um.</p>';
         } else {
             savedAddressesContainer.innerHTML = '';
-            savedAddresses.forEach(address => {
+            addresses.forEach(address => {
                 const addressDiv = document.createElement('div');
                 addressDiv.classList.add('list-group-item', 'd-flex', 'align-items-center');
                 addressDiv.innerHTML = `
                     <input class="form-check-input me-2" type="radio" name="shipping-address" id="address-${address.id}" value="${address.id}" ${selectedAddress && selectedAddress.id === address.id ? 'checked' : ''}>
                     <label class="form-check-label stretched-link" for="address-${address.id}">
-                        ${address.street}, ${address.city} - ${address.state}, ${address.zip}
+                        ${address.logradouro}, ${address.numero} - ${address.cidade}, ${address.estado}, ${address.cep}
                     </label>
                 `;
                 addressDiv.querySelector('input').addEventListener('change', () => {
@@ -119,17 +153,26 @@ document.addEventListener('sharedContentLoaded', async () => {
     }
 
     function renderCards() {
-        if (savedCards.length === 0) {
+        if (cards.length === 0) {
             savedCardsContainer.innerHTML = '<p class="text-muted">Nenhum cartão salvo. Por favor, adicione um.</p>';
         } else {
             savedCardsContainer.innerHTML = '';
-            savedCards.forEach(card => {
+            cards.forEach(card => {
                 const cardDiv = document.createElement('div');
                 cardDiv.classList.add('list-group-item', 'd-flex', 'align-items-center');
+
+                // Mapeamento para exibir o nome da bandeira
+                const bandeiraMap = {
+                    0: 'Visa',
+                    1: 'Mastercard',
+                    // Adicione outras bandeiras conforme necessário
+                };
+                const bandeiraNome = bandeiraMap[card.bandeira] || 'Desconhecida';
+
                 cardDiv.innerHTML = `
                     <input class="form-check-input me-2" type="radio" name="payment-method" id="card-${card.id}" value="${card.id}" ${selectedCard && selectedCard.id === card.id ? 'checked' : ''}>
                     <label class="form-check-label stretched-link" for="card-${card.id}">
-                        ${card.brand} **** ${card.last4}
+                        ${bandeiraNome} ${card.numCartao}
                     </label>
                 `;
                 cardDiv.querySelector('input').addEventListener('change', () => {
