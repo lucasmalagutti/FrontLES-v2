@@ -32,22 +32,21 @@ async function exibirResultados() {
     
     document.getElementById('loadingMessage').classList.remove('d-none');
     
-    setTimeout(() => {
-        const produtosFiltrados = produtos.filter(produto => 
-            produto.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
-            produto.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
-            produto.categoria.toLowerCase().includes(termoBusca.toLowerCase())
-        );
-        
-        document.getElementById('loadingMessage').classList.add('d-none');
-        
-        if (produtosFiltrados.length === 0) {
-            document.getElementById('noResultsMessage').classList.remove('d-none');
-        } else {
-            document.getElementById('resultsContainer').classList.remove('d-none');
-            renderizarProdutos(produtosFiltrados);
-        }
-    }, 1000);
+    // Remove o setTimeout para garantir que os produtos sejam filtrados após o carregamento
+    const produtosFiltrados = produtos.filter(produto => 
+        produto.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        produto.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        produto.categoria.toLowerCase().includes(termoBusca.toLowerCase())
+    );
+    
+    document.getElementById('loadingMessage').classList.add('d-none');
+    
+    if (produtosFiltrados.length === 0) {
+        document.getElementById('noResultsMessage').classList.remove('d-none');
+    } else {
+        document.getElementById('resultsContainer').classList.remove('d-none');
+        renderizarProdutos(produtosFiltrados);
+    }
 }
 
 function renderizarProdutos(produtosParaExibir) {
