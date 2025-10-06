@@ -497,21 +497,57 @@ document.addEventListener('sharedContentLoaded', async () => {
     placeOrderBtn.addEventListener('click', async () => {
         if (selectedAddress && selectedCard) {
             try {
-                // Para testes, sempre usar backend com ClienteID 33
+                // Obter dados do carrinho para criar a transação
+                let carrinhoData = null;
+                if (window.carrinhoService) {
+                    carrinhoData = await window.carrinhoService.obterCarrinho();
+                }
+
+                if (!carrinhoData || !carrinhoData.pedidoId || carrinhoData.pedidoId === 0) {
+                    throw new Error('Carrinho vazio. Adicione itens ao carrinho antes de finalizar a compra.');
+                }
+
+                // Calcular totais
+                const totals = calculateTotal();
+
+                // Criar transação
+                const transacaoData = {
+                    pedidoId: carrinhoData.pedidoId,
+                    valorTotal: totals.total,
+                    valorFrete: totals.shippingCost,
+                    enderecoId: selectedAddress.id,
+                    cartaoId: selectedCard.id
+                };
+
+                // Enviar transação para o backend
+                const response = await fetch('https://localhost:7280/api/Transacao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transacaoData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.mensagem || 'Erro ao criar transação');
+                }
+
+                const transacao = await response.json();
+                console.log('Transação criada:', transacao);
+
+                // Finalizar carrinho após criar a transação
                 if (window.carrinhoService) {
                     await window.carrinhoService.finalizarCarrinho();
-                } else {
-                    // Limpar carrinho local se não estiver logado
-                    localStorage.removeItem('cart');
                 }
                 
-                alert('Compra efetuada!');
+                alert('Compra efetuada com sucesso!');
                 setTimeout(() => {
                     window.location.href = 'index.html?order=success';
                 }, 1000);
             } catch (error) {
                 console.error('Erro ao finalizar pedido:', error);
-                alert('Erro ao finalizar pedido. Tente novamente.');
+                alert('Erro ao finalizar pedido: ' + error.message);
             }
         } else {
             alert('Por favor, selecione um endereço de entrega e um método de pagamento.');
