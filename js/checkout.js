@@ -536,9 +536,9 @@ document.addEventListener('sharedContentLoaded', async () => {
                 const transacao = await response.json();
                 console.log('Transação criada:', transacao);
                 
-                alert('Compra efetuada com sucesso!');
+                alert(`Compra efetuada com sucesso!\n\nID do Pedido: ${transacao.pedidoId}\nID da Transação: ${transacao.id}`);
                 setTimeout(() => {
-                    window.location.href = 'index.html?order=success';
+                    window.location.href = `index.html?order=success&pedidoId=${transacao.pedidoId}&transacaoId=${transacao.id}`;
                 }, 1000);
             } catch (error) {
                 console.error('Erro ao finalizar pedido:', error);

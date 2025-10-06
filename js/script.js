@@ -377,9 +377,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const urlParams = new URLSearchParams(window.location.search);
     const orderStatus = urlParams.get('order');
+    const pedidoId = urlParams.get('pedidoId');
+    const transacaoId = urlParams.get('transacaoId');
 
     if (orderStatus === 'success') {
-        showAlert('Compra efetuada com sucesso!', 'success');
+        let message = 'Compra efetuada com sucesso!';
+        if (pedidoId && transacaoId) {
+            message += `<br><br><strong>ID do Pedido:</strong> ${pedidoId}<br><strong>ID da Transação:</strong> ${transacaoId}`;
+        }
+        showAlert(message, 'success');
         // Remover o parâmetro da URL para que a mensagem não apareça novamente ao recarregar a página
         history.replaceState(null, '', window.location.pathname);
     } else if (orderStatus === 'cancelled') {
