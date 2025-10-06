@@ -75,7 +75,7 @@ document.addEventListener('sharedContentLoaded', async () => {
 
         // Eventos de "Ver Detalhes"
         document.querySelectorAll('.view-order-details').forEach(button => {
-            button.addEventListener('click', e => {
+            button.addEventListener('click', async e => {
                 const orderId = e.target.dataset.orderId;
                 const selectedOrder = orders.find(o =>
                     o.pedidoId == orderId ||
@@ -83,9 +83,8 @@ document.addEventListener('sharedContentLoaded', async () => {
                     o.id == orderId
                 );
                 if (selectedOrder) {
-                    populateTransacoesModal(selectedOrder);
-                    const modal = new bootstrap.Modal(document.getElementById('transacoesModal'));
-                    modal.show();
+                    // Buscar detalhes completos da transação incluindo os itens
+                    await loadOrderDetailsAndShowModal(selectedOrder);
                 }
             });
         });
@@ -103,43 +102,106 @@ document.addEventListener('sharedContentLoaded', async () => {
     }
 
     // ================================
+    // 🔹 Carrega detalhes completos da transação e exibe o modal
+    // ================================
+    async function loadOrderDetailsAndShowModal(order) {
+        try {
+            // Mostrar loading no modal
+            const modalBody = document.querySelector('#transacoesModal .modal-body');
+            if (modalBody) {
+                modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
+            }
+
+            // Buscar detalhes completos da transação por PedidoId
+            const pedidoId = order.pedidoId || (order.pedido ? order.pedido.id : order.id);
+            const response = await fetch(`https://localhost:7280/api/Transacao/pedido/${pedidoId}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+
+            const transacaoCompleta = await response.json();
+            
+            // Popular o modal com os dados completos
+            populateTransacoesModal(transacaoCompleta);
+            
+            // Exibir o modal
+            const modal = new bootstrap.Modal(document.getElementById('transacoesModal'));
+            modal.show();
+
+        } catch (error) {
+            console.error("Erro ao carregar detalhes do pedido:", error);
+            
+            // Mostrar erro no modal
+            const modalBody = document.querySelector('#transacoesModal .modal-body');
+            if (modalBody) {
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <h5>Erro ao carregar detalhes</h5>
+                        <p>Não foi possível carregar os detalhes do pedido. Verifique a conexão com o servidor.</p>
+                        <p class="mb-0"><small>Erro: ${error.message}</small></p>
+                    </div>
+                `;
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('transacoesModal'));
+            modal.show();
+        }
+    }
+
+    // ================================
     // 🔹 Popula o modal com detalhes
     // ================================
     function populateTransacoesModal(order) {
         const modalTitle = document.getElementById('transacoesModalLabel');
         const modalBody = document.querySelector('#transacoesModal .modal-body');
 
-        const pedido = order.pedido || {}; // Garante que não seja undefined
-        const itens = pedido.itens || []; // Itens estão dentro do Pedido
+        // Agora os itens vêm diretamente do ResponseTransacaoDTO
+        const itens = order.itens || []; // Itens vêm diretamente da transação
 
         if (modalTitle)
-            modalTitle.textContent = `Detalhes do Pedido #${pedido.id || order.pedidoId || order.id}`;
+            modalTitle.textContent = `Detalhes do Pedido #${order.pedidoId || order.id}`;
 
         if (modalBody) {
             let itemsHtml = '';
 
             if (Array.isArray(itens) && itens.length > 0) {
-                itens.forEach(item => {
+                itens.forEach((item, index) => {
+                    const subtotal = item.precoUnitario * item.quantidade;
                     itemsHtml += `
-                        <div class="table-responsive mb-3">
-                            <table class="table table-bordered table-striped">
-                                <tbody>
-                                    <tr><th>Produto:</th><td>${item.nomeProduto || item.product || '—'}</td></tr>
-                                    <tr><th>Preço:</th><td>R$ ${(item.preco || item.price || 0).toFixed(2)}</td></tr>
-                                    <tr><th>Quantidade:</th><td>${item.quantidade || item.quantity || 1}</td></tr>
-                                    <tr><th>Código:</th><td>${item.codigoProduto || item.code || '—'}</td></tr>
-                                </tbody>
-                            </table>
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Item ${index + 1}</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p class="mb-1"><strong>Produto:</strong> ${item.nomeProduto || '—'}</p>
+                                        <p class="mb-1"><strong>ID do Produto:</strong> ${item.produtoId || '—'}</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <p class="mb-1"><strong>Preço Unitário:</strong> R$ ${(item.precoUnitario || 0).toFixed(2)}</p>
+                                        <p class="mb-1"><strong>Quantidade:</strong> ${item.quantidade || 1}</p>
+                                        <p class="mb-0"><strong>Subtotal:</strong> R$ ${subtotal.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
             }
 
             modalBody.innerHTML = `
-                <p><strong>Data da Transação:</strong> ${formatDate(order.dataTransacao)}</p>
-                <p><strong>Valor Total:</strong> R$ ${(order.valorTotal || 0).toFixed(2)}</p>
-                <p><strong>Frete:</strong> R$ ${(order.valorFrete || 0).toFixed(2)}</p>
-                <p><strong>Status:</strong> <span class="badge bg-primary">${order.statusTransacao || '—'}</span></p>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Data da Transação:</strong> ${formatDate(order.dataTransacao)}</p>
+                        <p><strong>Status:</strong> <span class="badge bg-primary">${order.statusTransacao || '—'}</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Valor Total:</strong> R$ ${(order.valorTotal || 0).toFixed(2)}</p>
+                        <p><strong>Frete:</strong> R$ ${(order.valorFrete || 0).toFixed(2)}</p>
+                    </div>
+                </div>
                 <hr>
                 <h5>Itens do Pedido:</h5>
                 ${itemsHtml || '<p class="text-muted">Nenhum item encontrado.</p>'}
