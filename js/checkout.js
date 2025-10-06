@@ -535,11 +535,6 @@ document.addEventListener('sharedContentLoaded', async () => {
 
                 const transacao = await response.json();
                 console.log('Transação criada:', transacao);
-
-                // Finalizar carrinho após criar a transação
-                if (window.carrinhoService) {
-                    await window.carrinhoService.finalizarCarrinho();
-                }
                 
                 alert('Compra efetuada com sucesso!');
                 setTimeout(() => {
