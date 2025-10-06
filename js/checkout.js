@@ -33,12 +33,25 @@ document.addEventListener('sharedContentLoaded', async () => {
     let cards = [];
 
     let selectedAddress = null;
-    let selectedCard = null;
+    let selectedCards = [];
     let appliedCoupons = []; // Array para múltiplos cupons
     let appliedCouponsData = []; // Array para armazenar dados dos cupons aplicados
     let couponDiscount = 0;
 
     const CLIENT_ID = 33; // ID do cliente para testes
+
+    // Função centralizada para mapear bandeiras de cartão
+    function getBandeiraNome(bandeiraValue) {
+        const bandeiraMap = {
+            1: 'Visa',
+            2: 'Mastercard', // Exibindo como "Mastercard" mesmo que o enum seja "Mastercad"
+            3: 'American Express',
+            4: 'Elo',
+            5: 'HiperCard',
+            6: 'Aura'
+        };
+        return bandeiraMap[bandeiraValue] || 'Desconhecida';
+    }
 
     async function fetchAddresses(clientId) {
         try {
@@ -154,6 +167,7 @@ document.addEventListener('sharedContentLoaded', async () => {
                     selectedAddress = address;
                     updatePlaceOrderButtonState();
                     renderOrderSummary(); // Recalcular total com novo frete
+                    renderPaymentAmounts(); // Atualizar valores dos pagamentos
                 });
                 savedAddressesContainer.appendChild(addressDiv);
             });
@@ -169,26 +183,123 @@ document.addEventListener('sharedContentLoaded', async () => {
                 const cardDiv = document.createElement('div');
                 cardDiv.classList.add('list-group-item', 'd-flex', 'align-items-center');
 
-                // Mapeamento para exibir o nome da bandeira
-                const bandeiraMap = {
-                    0: 'Visa',
-                    1: 'Mastercard',
-                    // Adicione outras bandeiras conforme necessário
-                };
-                const bandeiraNome = bandeiraMap[card.bandeira] || 'Desconhecida';
+                const bandeiraNome = getBandeiraNome(card.bandeira);
 
+                const isSelected = selectedCards.some(selected => selected.id === card.id);
+                
                 cardDiv.innerHTML = `
-                    <input class="form-check-input me-2" type="radio" name="payment-method" id="card-${card.id}" value="${card.id}" ${selectedCard && selectedCard.id === card.id ? 'checked' : ''}>
-                    <label class="form-check-label stretched-link" for="card-${card.id}">
+                    <input class="form-check-input me-2" type="checkbox" name="payment-method" id="card-${card.id}" value="${card.id}" ${isSelected ? 'checked' : ''}>
+                    <label class="form-check-label" for="card-${card.id}">
                         ${bandeiraNome} ${card.numCartao}
                     </label>
                 `;
-                cardDiv.querySelector('input').addEventListener('change', () => {
-                    selectedCard = card;
+                cardDiv.querySelector('input').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedCards.push(card);
+                    } else {
+                        selectedCards = selectedCards.filter(selected => selected.id !== card.id);
+                    }
+                    renderPaymentAmounts();
                     updatePlaceOrderButtonState();
                 });
                 savedCardsContainer.appendChild(cardDiv);
             });
+            
+            // Adicionar seção para valores dos pagamentos
+            renderPaymentAmounts();
+        }
+    }
+
+    function renderPaymentAmounts() {
+        // Preservar valores existentes antes de recriar a seção
+        const existingValues = {};
+        if (selectedCards.length > 1) {
+            selectedCards.forEach(card => {
+                const input = document.getElementById(`amount-${card.id}`);
+                if (input && input.value) {
+                    existingValues[card.id] = input.value;
+                }
+            });
+        }
+
+        // Remover seção anterior se existir
+        const existingSection = document.getElementById('payment-amounts-section');
+        if (existingSection) {
+            existingSection.remove();
+        }
+
+        if (selectedCards.length > 1) {
+            const totals = calculateTotal();
+            const totalValue = totals.total;
+            
+            // Criar seção para valores dos pagamentos
+            const paymentSection = document.createElement('div');
+            paymentSection.id = 'payment-amounts-section';
+            paymentSection.classList.add('mt-3', 'p-3', 'border', 'rounded', 'bg-light');
+            paymentSection.innerHTML = `
+                <h6 class="mb-3">Distribuir valor entre os cartões</h6>
+                <p class="text-muted small mb-3">Valor total: R$ ${totalValue.toFixed(2)}</p>
+                <div id="payment-amounts-container"></div>
+                <div class="mt-2">
+                    <small class="text-muted">Total distribuído: R$ <span id="distributed-total">0.00</span></small>
+                </div>
+            `;
+            
+            // Inserir após a seção de cartões
+            savedCardsContainer.parentNode.insertBefore(paymentSection, savedCardsContainer.nextSibling);
+            
+            // Renderizar campos de valor para cada cartão selecionado
+            const container = document.getElementById('payment-amounts-container');
+            container.innerHTML = '';
+            
+            selectedCards.forEach((card, index) => {
+                const bandeiraNome = getBandeiraNome(card.bandeira);
+                
+                // Preservar valor existente se disponível
+                const preservedValue = existingValues[card.id] || '';
+                
+                const amountDiv = document.createElement('div');
+                amountDiv.classList.add('mb-2');
+                amountDiv.innerHTML = `
+                    <label for="amount-${card.id}" class="form-label small">${bandeiraNome} ${card.numCartao}</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">R$</span>
+                        <input type="number" class="form-control" id="amount-${card.id}" 
+                               min="0.01" step="0.01" placeholder="0.00" value="${preservedValue}"
+                               onchange="updateDistributedTotal()">
+                    </div>
+                `;
+                container.appendChild(amountDiv);
+            });
+            
+            updateDistributedTotal();
+        }
+    }
+
+    function updateDistributedTotal() {
+        const distributedTotalSpan = document.getElementById('distributed-total');
+        if (!distributedTotalSpan) return;
+        
+        let total = 0;
+        selectedCards.forEach(card => {
+            const input = document.getElementById(`amount-${card.id}`);
+            if (input && input.value) {
+                total += parseFloat(input.value) || 0;
+            }
+        });
+        
+        distributedTotalSpan.textContent = total.toFixed(2);
+        
+        // Verificar se o total distribuído é igual ao valor total
+        const totals = calculateTotal();
+        const isValid = Math.abs(total - totals.total) < 0.01;
+        
+        if (isValid) {
+            distributedTotalSpan.parentElement.classList.remove('text-danger');
+            distributedTotalSpan.parentElement.classList.add('text-success');
+        } else {
+            distributedTotalSpan.parentElement.classList.remove('text-success');
+            distributedTotalSpan.parentElement.classList.add('text-danger');
         }
     }
 
@@ -294,7 +405,7 @@ document.addEventListener('sharedContentLoaded', async () => {
     }
 
     function updatePlaceOrderButtonState() {
-        if (selectedAddress && selectedCard && cart.length > 0) {
+        if (selectedAddress && selectedCards.length > 0 && cart.length > 0) {
             placeOrderBtn.disabled = false;
             placeOrderBtn.classList.remove('btn-secondary');
             placeOrderBtn.classList.add('btn-success');
@@ -342,6 +453,7 @@ document.addEventListener('sharedContentLoaded', async () => {
                 couponInput.value = '';
                 renderOrderSummary(); // Recalcular totais
                 renderAppliedCoupons(); // Atualizar a lista de cupons aplicados
+                renderPaymentAmounts(); // Atualizar valores dos pagamentos
             } else {
                 // Cupom inválido
                 alert(data.mensagem || 'Cupom inválido.');
@@ -359,6 +471,7 @@ document.addEventListener('sharedContentLoaded', async () => {
             appliedCouponsData.splice(index, 1); // Remover também os dados do cupom
             renderOrderSummary(); // Recalcular totais
             renderAppliedCoupons(); // Atualizar a lista de cupons aplicados
+            renderPaymentAmounts(); // Atualizar valores dos pagamentos
         }
     }
 
@@ -495,7 +608,7 @@ document.addEventListener('sharedContentLoaded', async () => {
     });
 
     placeOrderBtn.addEventListener('click', async () => {
-        if (selectedAddress && selectedCard) {
+        if (selectedAddress && selectedCards.length > 0) {
             try {
                 // Obter dados do carrinho para criar a transação
                 let carrinhoData = null;
@@ -510,17 +623,45 @@ document.addEventListener('sharedContentLoaded', async () => {
                 // Calcular totais
                 const totals = calculateTotal();
 
-                // Criar transação
+                // Preparar pagamentos
+                const pagamentos = [];
+                
+                if (selectedCards.length === 1) {
+                    // Pagamento único
+                    pagamentos.push({
+                        cartaoId: selectedCards[0].id,
+                        valor: totals.total
+                    });
+                } else {
+                    // Múltiplos pagamentos - verificar se os valores foram informados
+                    let totalDistribuido = 0;
+                    selectedCards.forEach(card => {
+                        const input = document.getElementById(`amount-${card.id}`);
+                        const valor = parseFloat(input.value) || 0;
+                        pagamentos.push({
+                            cartaoId: card.id,
+                            valor: valor
+                        });
+                        totalDistribuido += valor;
+                    });
+                    
+                    // Verificar se a soma dos valores é igual ao total
+                    if (Math.abs(totalDistribuido - totals.total) > 0.01) {
+                        throw new Error(`A soma dos valores (R$ ${totalDistribuido.toFixed(2)}) deve ser igual ao valor total (R$ ${totals.total.toFixed(2)})`);
+                    }
+                }
+
+                // Criar transação com pagamentos
                 const transacaoData = {
                     pedidoId: carrinhoData.pedidoId,
                     valorTotal: totals.total,
                     valorFrete: totals.shippingCost,
                     enderecoId: selectedAddress.id,
-                    cartaoId: selectedCard.id
+                    pagamentos: pagamentos
                 };
 
                 // Enviar transação para o backend
-                const response = await fetch('https://localhost:7280/api/Transacao', {
+                const response = await fetch('https://localhost:7280/api/Pagamento/transacao', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -545,7 +686,7 @@ document.addEventListener('sharedContentLoaded', async () => {
                 alert('Erro ao finalizar pedido: ' + error.message);
             }
         } else {
-            alert('Por favor, selecione um endereço de entrega e um método de pagamento.');
+            alert('Por favor, selecione um endereço de entrega e pelo menos um cartão de pagamento.');
         }
     });
 
