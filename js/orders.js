@@ -13,13 +13,12 @@ document.addEventListener('sharedContentLoaded', async () => {
     async function loadOrders() {
         try {
             const response = await fetch(apiUrl);
-
             if (!response.ok)
                 throw new Error(`Erro HTTP: ${response.status}`);
 
             const data = await response.json();
 
-            // Garante que seja um array
+            // Garante que sempre será um array
             if (Array.isArray(data)) {
                 orders = data;
             } else if (data && data.transacoes) {
@@ -39,7 +38,7 @@ document.addEventListener('sharedContentLoaded', async () => {
     }
 
     // ================================
-    // 🔹 Renderiza os pedidos
+    // 🔹 Renderiza as transações/pedidos
     // ================================
     function renderOrders() {
         if (!orders || orders.length === 0) {
@@ -56,7 +55,7 @@ document.addEventListener('sharedContentLoaded', async () => {
             const status = order.statusTransacao || 'EM PROCESSAMENTO';
             const total = order.valorTotal || 0;
             const data = formatDate(order.dataTransacao);
-            const pedidoId = order.pedidoId || order.id || '—';
+            const pedidoId = order.pedidoId || (order.pedido ? order.pedido.id : order.id) || '—';
 
             orderCard.innerHTML = `
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -74,11 +73,15 @@ document.addEventListener('sharedContentLoaded', async () => {
             ordersListContainer.appendChild(orderCard);
         });
 
-        // Botões de detalhes
+        // Eventos de "Ver Detalhes"
         document.querySelectorAll('.view-order-details').forEach(button => {
             button.addEventListener('click', e => {
                 const orderId = e.target.dataset.orderId;
-                const selectedOrder = orders.find(o => o.pedidoId == orderId || o.id == orderId);
+                const selectedOrder = orders.find(o =>
+                    o.pedidoId == orderId ||
+                    (o.pedido && o.pedido.id == orderId) ||
+                    o.id == orderId
+                );
                 if (selectedOrder) {
                     populateTransacoesModal(selectedOrder);
                     const modal = new bootstrap.Modal(document.getElementById('transacoesModal'));
@@ -87,7 +90,7 @@ document.addEventListener('sharedContentLoaded', async () => {
             });
         });
 
-        // Botões de troca/devolução
+        // Eventos de "Troca/Devolução"
         document.querySelectorAll('.request-exchange').forEach(button => {
             button.addEventListener('click', e => {
                 orderIdToExchange = e.target.dataset.orderId;
@@ -100,21 +103,23 @@ document.addEventListener('sharedContentLoaded', async () => {
     }
 
     // ================================
-    // 🔹 Modal de detalhes da transação
+    // 🔹 Popula o modal com detalhes
     // ================================
     function populateTransacoesModal(order) {
         const modalTitle = document.getElementById('transacoesModalLabel');
         const modalBody = document.querySelector('#transacoesModal .modal-body');
 
+        const pedido = order.pedido || {}; // Garante que não seja undefined
+        const itens = pedido.itens || []; // Itens estão dentro do Pedido
+
         if (modalTitle)
-            modalTitle.textContent = `Detalhes do Pedido #${order.pedidoId || order.id}`;
+            modalTitle.textContent = `Detalhes do Pedido #${pedido.id || order.pedidoId || order.id}`;
 
         if (modalBody) {
             let itemsHtml = '';
 
-            // Se o backend retornar os itens (em DTOs futuros), renderiza
-            if (order.itens && Array.isArray(order.itens)) {
-                order.itens.forEach(item => {
+            if (Array.isArray(itens) && itens.length > 0) {
+                itens.forEach(item => {
                     itemsHtml += `
                         <div class="table-responsive mb-3">
                             <table class="table table-bordered table-striped">
