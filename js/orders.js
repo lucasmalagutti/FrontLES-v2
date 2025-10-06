@@ -1,15 +1,12 @@
 document.addEventListener('sharedContentLoaded', async () => {
 
     const ordersListContainer = document.getElementById('orders-list');
-    const clienteId = 33; // ID mocado para teste
+    const clienteId = 33;
     const apiUrl = `https://localhost:7280/Transacao/ListarPorCliente/${clienteId}`;
 
     let orders = [];
     let orderIdToExchange = null;
 
-    // ================================
-    // 🔹 Carrega transações do cliente
-    // ================================
     async function loadOrders() {
         try {
             const response = await fetch(apiUrl);
@@ -18,7 +15,6 @@ document.addEventListener('sharedContentLoaded', async () => {
 
             const data = await response.json();
 
-            // Garante que sempre será um array
             if (Array.isArray(data)) {
                 orders = data;
             } else if (data && data.transacoes) {
@@ -37,9 +33,6 @@ document.addEventListener('sharedContentLoaded', async () => {
         }
     }
 
-    // ================================
-    // 🔹 Renderiza as transações/pedidos
-    // ================================
     function renderOrders() {
         if (!orders || orders.length === 0) {
             ordersListContainer.innerHTML = '<p class="text-muted text-center">Nenhum pedido encontrado.</p>';
@@ -66,14 +59,14 @@ document.addEventListener('sharedContentLoaded', async () => {
                     <p class="card-text">Data: ${data}</p>
                     <p class="card-text">Total: R$ ${total.toFixed(2)}</p>
                     <button class="btn btn-sm btn-info me-2 view-order-details" data-order-id="${pedidoId}">Ver Detalhes</button>
-                    <button class="btn btn-sm btn-warning request-exchange" data-order-id="${pedidoId}">Realizar Troca/Devolução</button>
+                    <button class="btn btn-sm btn-warning me-2 request-exchange" data-order-id="${pedidoId}">Realizar Troca/Devolução</button>
+                    <button class="btn btn-sm btn-secondary request-product-exchange" data-order-id="${pedidoId}">Realizar Troca de Produto</button>
                 </div>
             `;
 
             ordersListContainer.appendChild(orderCard);
         });
 
-        // Eventos de "Ver Detalhes"
         document.querySelectorAll('.view-order-details').forEach(button => {
             button.addEventListener('click', async e => {
                 const orderId = e.target.dataset.orderId;
@@ -83,13 +76,11 @@ document.addEventListener('sharedContentLoaded', async () => {
                     o.id == orderId
                 );
                 if (selectedOrder) {
-                    // Buscar detalhes completos da transação incluindo os itens
                     await loadOrderDetailsAndShowModal(selectedOrder);
                 }
             });
         });
 
-        // Eventos de "Troca/Devolução"
         document.querySelectorAll('.request-exchange').forEach(button => {
             button.addEventListener('click', e => {
                 orderIdToExchange = e.target.dataset.orderId;
@@ -99,20 +90,22 @@ document.addEventListener('sharedContentLoaded', async () => {
                 confirmExchangeModal.show();
             });
         });
+
+        document.querySelectorAll('.request-product-exchange').forEach(button => {
+            button.addEventListener('click', e => {
+                const orderId = e.target.dataset.orderId;
+                console.log('Botão Realizar Troca de Produto clicado para o pedido:', orderId);
+            });
+        });
     }
 
-    // ================================
-    // 🔹 Carrega detalhes completos da transação e exibe o modal
-    // ================================
     async function loadOrderDetailsAndShowModal(order) {
         try {
-            // Mostrar loading no modal
             const modalBody = document.querySelector('#transacoesModal .modal-body');
             if (modalBody) {
                 modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
             }
 
-            // Buscar detalhes completos da transação por PedidoId
             const pedidoId = order.pedidoId || (order.pedido ? order.pedido.id : order.id);
             const response = await fetch(`https://localhost:7280/api/Transacao/pedido/${pedidoId}`);
             
@@ -122,17 +115,14 @@ document.addEventListener('sharedContentLoaded', async () => {
 
             const transacaoCompleta = await response.json();
             
-            // Popular o modal com os dados completos
             populateTransacoesModal(transacaoCompleta);
             
-            // Exibir o modal
             const modal = new bootstrap.Modal(document.getElementById('transacoesModal'));
             modal.show();
 
         } catch (error) {
             console.error("Erro ao carregar detalhes do pedido:", error);
             
-            // Mostrar erro no modal
             const modalBody = document.querySelector('#transacoesModal .modal-body');
             if (modalBody) {
                 modalBody.innerHTML = `
@@ -149,15 +139,11 @@ document.addEventListener('sharedContentLoaded', async () => {
         }
     }
 
-    // ================================
-    // 🔹 Popula o modal com detalhes
-    // ================================
     function populateTransacoesModal(order) {
         const modalTitle = document.getElementById('transacoesModalLabel');
         const modalBody = document.querySelector('#transacoesModal .modal-body');
 
-        // Agora os itens vêm diretamente do ResponseTransacaoDTO
-        const itens = order.itens || []; // Itens vêm diretamente da transação
+        const itens = order.itens || [];
 
         if (modalTitle)
             modalTitle.textContent = `Detalhes do Pedido #${order.pedidoId || order.id}`;
@@ -209,17 +195,11 @@ document.addEventListener('sharedContentLoaded', async () => {
         }
     }
 
-    // ================================
-    // 🔹 Formata data
-    // ================================
     function formatDate(dateStr) {
         if (!dateStr) return '—';
         const d = new Date(dateStr);
         return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
     }
 
-    // ================================
-    // 🔹 Inicialização
-    // ================================
     await loadOrders();
 });

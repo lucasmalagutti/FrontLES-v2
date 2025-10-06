@@ -34,12 +34,11 @@ function showAlert(message, type) {
     }, 5000);
 }
 
-let cart = []; // Sempre iniciar vazio
+let cart = [];
 
 async function saveCartToLocalStorage() {
     localStorage.setItem('cart', JSON.stringify(cart));
     
-    // Para testes, sempre sincronizar com o backend (ClienteID 33)
     if (window.carrinhoService) {
         try {
             await window.carrinhoService.sincronizarCarrinho();
@@ -120,12 +119,8 @@ export function initializeCartFunctionality() {
             const quantityToAdd = parseInt(quantityDisplay.textContent);
 
             try {
-                // Para testes, sempre usar backend com ClienteID 33
-                // Quando implementar login, substituir por:
-                // if (window.carrinhoService && window.carrinhoService.clienteId) {
                 if (window.carrinhoService) {
                     await window.carrinhoService.adicionarItem(productId, quantityToAdd, productPrice);
-                    // Recarregar carrinho do backend
                     const carrinhoBackend = await window.carrinhoService.obterCarrinho();
                     cart = carrinhoBackend.itens.map(item => ({
                         id: item.produtoId,
@@ -135,7 +130,6 @@ export function initializeCartFunctionality() {
                         image: item.imagemProduto
                     }));
                 } else {
-                    // Usar carrinho local se não estiver logado
                     const existingItem = cart.find(item => item.id === productId);
 
                     if (existingItem) {
@@ -196,10 +190,8 @@ export function initializeCartFunctionality() {
                 const productId = removeButton.dataset.productId;
                 
                 try {
-                    // Para testes, sempre usar backend com ClienteID 33
                     if (window.carrinhoService) {
                         await window.carrinhoService.removerItem(productId);
-                        // Recarregar carrinho do backend
                         const carrinhoBackend = await window.carrinhoService.obterCarrinho();
                         cart = carrinhoBackend.itens.map(item => ({
                             id: item.produtoId,
@@ -221,10 +213,8 @@ export function initializeCartFunctionality() {
                 const productId = event.target.dataset.productId;
                 
                 try {
-                    // Para testes, sempre usar backend com ClienteID 33
                     if (window.carrinhoService) {
                         await window.carrinhoService.adicionarQtdCarrinho(productId);
-                        // Recarregar carrinho do backend
                         const carrinhoBackend = await window.carrinhoService.obterCarrinho();
                         cart = carrinhoBackend.itens.map(item => ({
                             id: item.produtoId,
@@ -249,10 +239,8 @@ export function initializeCartFunctionality() {
                 const productId = event.target.dataset.productId;
                 
                 try {
-                    // Para testes, sempre usar backend com ClienteID 33
                     if (window.carrinhoService) {
                         await window.carrinhoService.diminuirQtdCarrinho(productId);
-                        // Recarregar carrinho do backend
                         const carrinhoBackend = await window.carrinhoService.obterCarrinho();
                         cart = carrinhoBackend.itens.map(item => ({
                             id: item.produtoId,
@@ -283,7 +271,6 @@ export function initializeCartFunctionality() {
     if (clearCartBtn) {
         clearCartBtn.addEventListener('click', async () => {
             try {
-                // Para testes, sempre usar backend com ClienteID 33
                 if (window.carrinhoService) {
                     await window.carrinhoService.limparCarrinho();
                     cart = [];
@@ -303,7 +290,7 @@ export function initializeCartFunctionality() {
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', async () => {
             if (cart.length > 0) {
-                await saveCartToLocalStorage(); // Salva o carrinho antes de redirecionar
+                await saveCartToLocalStorage();
                 window.location.href = 'checkout.html';
             } else {
                 showAlert('Seu carrinho está vazio!', 'warning');
@@ -350,12 +337,7 @@ function renderizarProdutosEmDestaque(produtosParaExibir) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Limpar localStorage do carrinho para evitar dados antigos
     localStorage.removeItem('cart');
-    
-    // Para testes, sempre usar ClienteID 33
-    // Quando implementar login, substituir por:
-    // if (window.carrinhoService && window.carrinhoService.clienteId) {
     if (window.carrinhoService) {
         try {
             const carrinhoBackend = await window.carrinhoService.obterCarrinho();
@@ -368,11 +350,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }));
         } catch (error) {
             console.error('Erro ao carregar carrinho do backend:', error);
-            // Manter carrinho vazio se não conseguir carregar do backend
         }
     }
 
-    const produtosCarregados = await carregarProdutos(); // Carrega os produtos antes de renderizar
+    const produtosCarregados = await carregarProdutos();
     renderizarProdutosEmDestaque(produtosCarregados);
     
     const urlParams = new URLSearchParams(window.location.search);
@@ -386,11 +367,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             message += `<br><br><strong>ID do Pedido:</strong> ${pedidoId}<br><strong>ID da Transação:</strong> ${transacaoId}`;
         }
         showAlert(message, 'success');
-        // Remover o parâmetro da URL para que a mensagem não apareça novamente ao recarregar a página
         history.replaceState(null, '', window.location.pathname);
     } else if (orderStatus === 'cancelled') {
         showAlert('Pedido cancelado.', 'info');
-        // Remover o parâmetro da URL
         history.replaceState(null, '', window.location.pathname);
     }
 });
