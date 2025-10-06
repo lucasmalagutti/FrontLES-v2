@@ -35,6 +35,7 @@ document.addEventListener('sharedContentLoaded', async () => {
     let selectedAddress = null;
     let selectedCard = null;
     let appliedCoupons = []; // Array para múltiplos cupons
+    let appliedCouponsData = []; // Array para armazenar dados dos cupons aplicados
     let couponDiscount = 0;
 
     const CLIENT_ID = 33; // ID do cliente para testes
@@ -102,30 +103,25 @@ document.addEventListener('sharedContentLoaded', async () => {
             shippingCost = 0.00; // Valor padrão se não houver endereço selecionado
         }
         
+        // Aplicar cupom de frete grátis - zerar frete se FRETEZERO estiver aplicado
+        if (appliedCoupons.includes('FRETEZERO')) {
+            shippingCost = 0;
+        }
+        
         // Aplicar desconto dos cupons (se houver)
         let totalDiscountAmount = 0;
         let subtotalWithDiscount = subtotal;
         
-        if (appliedCoupons.length > 0) {
-            // Calcular desconto total de todos os cupons percentuais
-            appliedCoupons.forEach(coupon => {
-                if (coupon !== 'FRETEZERO') {
-                    const validCoupons = {
-                        'DESCONTO10': 10,
-                        'DESCONTO20': 20
-                    };
-                    if (validCoupons[coupon]) {
-                        totalDiscountAmount += subtotal * (validCoupons[coupon] / 100);
-                    }
+        if (appliedCouponsData.length > 0) {
+            // Para cada cupom aplicado, aplicar o desconto correspondente
+            appliedCouponsData.forEach(cupomData => {
+                if (cupomData.nome.toUpperCase() !== 'FRETEZERO') {
+                    // Aplicar desconto percentual baseado no valor retornado pela API
+                    totalDiscountAmount += subtotal * cupomData.desconto;
                 }
             });
             
             subtotalWithDiscount = subtotal - totalDiscountAmount;
-        }
-        
-        // Aplicar cupom de frete grátis
-        if (appliedCoupons.includes('FRETEZERO')) {
-            shippingCost = 0;
         }
         
         // Calcular total final (subtotal com desconto + frete)
@@ -197,30 +193,28 @@ document.addEventListener('sharedContentLoaded', async () => {
     }
 
     function renderAppliedCoupons() {
-        if (appliedCoupons.length === 0) {
+        if (appliedCouponsData.length === 0) {
             appliedCouponsContainer.innerHTML = '<p class="text-muted">Nenhum cupom aplicado.</p>';
         } else {
             appliedCouponsContainer.innerHTML = '';
-            appliedCoupons.forEach(coupon => {
+            appliedCouponsData.forEach((cupomData, index) => {
                 const couponDiv = document.createElement('div');
                 couponDiv.classList.add('badge', 'bg-info', 'text-dark', 'me-2', 'mb-2', 'p-2');
                 
                 let discountText = '';
-                if (coupon === 'FRETEZERO') {
+                if (cupomData.nome.toUpperCase() === 'FRETEZERO') {
                     discountText = 'Frete Grátis';
-                } else if (coupon === 'DESCONTO10') {
-                    discountText = '10% de desconto';
-                } else if (coupon === 'DESCONTO20') {
-                    discountText = '20% de desconto';
+                } else {
+                    discountText = `${(cupomData.desconto * 100).toFixed(0)}% de desconto`;
                 }
                 
                 couponDiv.innerHTML = `
-                    ${coupon} (${discountText})
+                    ${cupomData.nome} (${discountText})
                     <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remover cupom"></button>
                 `;
                 
                 couponDiv.querySelector('.btn-close').addEventListener('click', () => {
-                    removeCoupon(coupon);
+                    removeCoupon(appliedCoupons[index]);
                 });
                 
                 appliedCouponsContainer.appendChild(couponDiv);
@@ -267,7 +261,7 @@ document.addEventListener('sharedContentLoaded', async () => {
         totalAmountSpan.textContent = `R$ ${totals.total.toFixed(2)}`;
         
         // Se há cupom aplicado, mostrar o desconto
-        if (appliedCoupons.length > 0) {
+        if (appliedCouponsData.length > 0) {
             // Adicionar linha de desconto se não existir
             let discountRow = document.getElementById('discount-row');
             if (!discountRow) {
@@ -275,7 +269,7 @@ document.addEventListener('sharedContentLoaded', async () => {
                 discountRow.id = 'discount-row';
                 discountRow.classList.add('d-flex', 'justify-content-between', 'p-2', 'border-top', 'text-success');
                 discountRow.innerHTML = `
-                    <span>Desconto (${appliedCoupons.join(', ')}):</span>
+                    <span>Desconto (${appliedCouponsData.map(c => c.nome).join(', ')}):</span>
                     <span>-R$ ${totals.discountAmount.toFixed(2)}</span>
                 `;
                 
@@ -286,7 +280,7 @@ document.addEventListener('sharedContentLoaded', async () => {
                 }
             } else {
                 discountRow.innerHTML = `
-                    <span>Desconto (${appliedCoupons.join(', ')}):</span>
+                    <span>Desconto (${appliedCouponsData.map(c => c.nome).join(', ')}):</span>
                     <span>-R$ ${totals.discountAmount.toFixed(2)}</span>
                 `;
             }
@@ -311,32 +305,50 @@ document.addEventListener('sharedContentLoaded', async () => {
         }
     }
 
-    function applyCoupon(couponCode) {
-        const validCoupons = {
-            'DESCONTO10': 10, // 10% de desconto
-            'DESCONTO20': 20, // 20% de desconto
-            'FRETEZERO': 0    // Frete grátis
-        };
-        
-        if (validCoupons.hasOwnProperty(couponCode.toUpperCase())) {
-            if (!appliedCoupons.includes(couponCode.toUpperCase())) {
+    async function applyCoupon(couponCode) {
+        if (!couponCode || couponCode.trim() === '') {
+            alert('Por favor, digite um código de cupom.');
+            return;
+        }
+
+        // Verificar se o cupom já foi aplicado
+        if (appliedCoupons.includes(couponCode.toUpperCase())) {
+            alert('Este cupom já foi aplicado.');
+            return;
+        }
+
+        try {
+            const response = await fetch('https://localhost:7280/api/Cupom/validar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nome: couponCode.trim()
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.valido) {
+                // Cupom válido - adicionar à lista de cupons aplicados
                 appliedCoupons.push(couponCode.toUpperCase());
-                couponDiscount = validCoupons[couponCode.toUpperCase()];
-                
-                // Se for cupom de frete grátis, aplicar desconto no frete
-                if (couponCode.toUpperCase() === 'FRETEZERO') {
-                    couponDiscount = 0; // Não aplicar desconto percentual
-                }
+                appliedCouponsData.push({
+                    nome: data.nome,
+                    desconto: data.desconto
+                });
                 
                 alert(`Cupom ${couponCode} aplicado com sucesso!`);
                 couponInput.value = '';
                 renderOrderSummary(); // Recalcular totais
                 renderAppliedCoupons(); // Atualizar a lista de cupons aplicados
             } else {
-                alert('Este cupom já foi aplicado.');
+                // Cupom inválido
+                alert(data.mensagem || 'Cupom inválido.');
             }
-        } else {
-            alert('Cupom inválido. Tente: DESCONTO10, DESCONTO20 ou FRETEZERO');
+        } catch (error) {
+            console.error('Erro ao validar cupom:', error);
+            alert('Erro ao validar cupom. Tente novamente.');
         }
     }
 
@@ -344,8 +356,115 @@ document.addEventListener('sharedContentLoaded', async () => {
         const index = appliedCoupons.indexOf(couponCode);
         if (index > -1) {
             appliedCoupons.splice(index, 1);
+            appliedCouponsData.splice(index, 1); // Remover também os dados do cupom
             renderOrderSummary(); // Recalcular totais
             renderAppliedCoupons(); // Atualizar a lista de cupons aplicados
+        }
+    }
+
+    // Função para adicionar endereço
+    async function adicionarEndereco() {
+        const modal = document.getElementById('addEnderecoModal');
+        const clienteId = modal.getAttribute('data-cliente-id');
+
+        if (!clienteId || clienteId === "${clienteId}") {
+            alert('ID do cliente não encontrado. Por favor, certifique-se de que o ID do cliente está sendo passado corretamente para o modal.');
+            return;
+        }
+
+        const endereco = {
+            nome: document.getElementById('enderecoNome').value,
+            tipoEndereco: parseInt(document.getElementById('enderecoTipoEndereco').value),
+            tipoResidencia: parseInt(document.getElementById('enderecoTipoResidencia').value),
+            tipoLogradouro: parseInt(document.getElementById('enderecoTipoLogradouro').value),
+            logradouro: document.getElementById('enderecoLogradouro').value,
+            numero: document.getElementById('enderecoNumero').value,
+            cep: document.getElementById('enderecoCep').value,
+            bairro: document.getElementById('enderecoBairro').value,
+            cidade: document.getElementById('enderecoCidade').value,
+            estado: document.getElementById('enderecoEstado').value,
+            pais: document.getElementById('enderecoPais').value,
+            observacoes: document.getElementById('enderecoObservacoes').value
+        };
+
+        try {
+            const response = await fetch(`https://localhost:7280/Endereco/Cadastrar/${clienteId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(endereco)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao salvar o endereço');
+            }
+
+            const data = await response.json();
+            alert('Endereço salvo com sucesso!');
+            
+            // Fechar o modal após o sucesso
+            const addEnderecoModal = bootstrap.Modal.getInstance(document.getElementById('addEnderecoModal'));
+            if (addEnderecoModal) {
+                addEnderecoModal.hide();
+            }
+            
+            // Recarregar a lista de endereços
+            await fetchAddresses(CLIENT_ID);
+            
+        } catch (error) {
+            console.error('Erro ao salvar endereço:', error);
+            alert('Erro ao salvar o endereço: ' + error.message);
+        }
+    }
+
+    // Função para adicionar cartão
+    async function adicionarCartao() {
+        const modal = document.getElementById('addCartaoModal');
+        const clienteId = modal.getAttribute('data-cliente-id');
+
+        if (!clienteId || clienteId === "${clienteId}") {
+            alert('ID do cliente não encontrado. Por favor, certifique-se de que o ID do cliente está sendo passado corretamente para o modal.');
+            return;
+        }
+
+        const cartao = {
+            numCartao: document.getElementById('addCartaoNumero').value,
+            nomeImpresso: document.getElementById('addCartaoNomeImpresso').value,
+            bandeira: parseInt(document.getElementById('addCartaoBandeira').value),
+            cvc: parseInt(document.getElementById('addCartaoCvv').value),
+            preferencial: false
+        };
+
+        try {
+            const response = await fetch(`https://localhost:7280/Cartao/Cadastrar/${clienteId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cartao)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.mensagem || 'Erro ao salvar o cartão');
+            }
+
+            alert('Cartão salvo com sucesso!');
+            
+            // Fechar o modal após o sucesso
+            const addCartaoModal = bootstrap.Modal.getInstance(document.getElementById('addCartaoModal'));
+            if (addCartaoModal) {
+                addCartaoModal.hide();
+            }
+            
+            // Recarregar a lista de cartões
+            await fetchCards(CLIENT_ID);
+            
+        } catch (error) {
+            console.error('Erro ao salvar cartão:', error);
+            alert('Erro ao salvar o cartão: ' + error.message);
         }
     }
 
@@ -406,10 +525,55 @@ document.addEventListener('sharedContentLoaded', async () => {
         }, 1000);
     });
 
+    // Configurar event listeners para os botões dos modais
+    function setupModalEventListeners() {
+        // Event listener para o botão "Salvar Endereço"
+        const salvarEnderecoBtn = document.getElementById('salvarEnderecoBtn');
+        if (salvarEnderecoBtn) {
+            salvarEnderecoBtn.addEventListener('click', adicionarEndereco);
+        }
+
+        // Event listener para o botão "Salvar Cartão"
+        const salvarCartaoBtn = document.getElementById('salvarCartaoBtn');
+        if (salvarCartaoBtn) {
+            salvarCartaoBtn.addEventListener('click', adicionarCartao);
+        }
+    }
+
+    // Usar MutationObserver para detectar quando os modais são carregados
+    const modalObserver = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                for (const addedNode of mutation.addedNodes) {
+                    if (addedNode.nodeType === 1) {
+                        // Verificar se o modal de endereço foi adicionado
+                        if (addedNode.id === 'addEnderecoModal') {
+                            const salvarEnderecoBtn = document.getElementById('salvarEnderecoBtn');
+                            if (salvarEnderecoBtn) {
+                                salvarEnderecoBtn.addEventListener('click', adicionarEndereco);
+                            }
+                        }
+                        // Verificar se o modal de cartão foi adicionado
+                        if (addedNode.id === 'addCartaoModal') {
+                            const salvarCartaoBtn = document.getElementById('salvarCartaoBtn');
+                            if (salvarCartaoBtn) {
+                                salvarCartaoBtn.addEventListener('click', adicionarCartao);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Começar a observar mudanças no DOM
+    modalObserver.observe(document.body, { childList: true, subtree: true });
+
     // Inicialização
     renderAddresses();
     renderCards();
     renderAppliedCoupons(); // Inicializar a lista de cupons aplicados
     renderOrderSummary();
     updatePlaceOrderButtonState();
+    setupModalEventListeners(); // Configurar event listeners dos modais
 });
