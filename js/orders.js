@@ -1,162 +1,133 @@
-document.addEventListener('sharedContentLoaded', () => {
-    // Dados simulados de pedidos
-    let orders = JSON.parse(localStorage.getItem('orders')) || [
-        {
-            id: 'ORD001',
-            status: 'ENTREGUE',
-            date: '2023-10-26',
-            total: 150.75,
-            items: [
-                { product: 'Bola de Futebol Nike', brand: 'Nike', sport: 'Futebol', price: 100.00, quantity: 1, code: '0001', deliveryAddress: 'Rua Glicério, 70 - Itaquaquecetuba, SP' },
-                { product: 'Meia de Basquete Adidas', brand: 'Adidas', sport: 'Basquete', price: 25.30, quantity: 2, code: '0002', deliveryAddress: 'Rua Glicério, 70 - Itaquaquecetuba, SP' }
-            ]
-        },
-        {
-            id: 'ORD002',
-            status: 'EM PROCESSAMENTO',
-            date: '2023-10-20',
-            total: 75.00,
-            items: [
-                { product: 'Camisa de Time São Paulo', brand: 'Adidas', sport: 'Futebol', price: 75.00, quantity: 1, code: '0003', deliveryAddress: 'Av. Principal, 456 - Rio de Janeiro, RJ' }
-            ]
-        }
-    ];
+document.addEventListener('sharedContentLoaded', async () => {
 
     const ordersListContainer = document.getElementById('orders-list');
+    const clienteId = 1; // ID mocado para teste
+    const apiUrl = `https://localhost:7280/Transacao/Listar/${clienteId}`;
 
-    // Variável para armazenar o ID do pedido que será trocado
+    let orders = [];
     let orderIdToExchange = null;
 
-    function renderOrders() {
-        if (orders.length === 0) {
-            ordersListContainer.innerHTML = '<p class="text-muted text-center">Nenhum pedido encontrado.</p>';
-        } else {
-            ordersListContainer.innerHTML = '';
-            orders.forEach(order => {
-                const orderCard = document.createElement('div');
-                orderCard.classList.add('card', 'mb-3', 'shadow-sm');
-                orderCard.innerHTML = `
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Pedido #${order.id}</h5>
-                        <span class="badge bg-primary">${order.status}</span>
+    async function loadOrders() {
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">Data: ${order.date}</p>
-                        <p class="card-text">Total: R$ ${order.total.toFixed(2)}</p>
-                        <button class="btn btn-sm btn-info me-2 view-order-details" data-order-id="${order.id}">Ver Detalhes</button>
-                        <button class="btn btn-sm btn-warning request-exchange" data-order-id="${order.id}">Realizar Troca/Devolução</button>
-                    </div>
-                `;
-                ordersListContainer.appendChild(orderCard);
-            });
+            const data = await response.json();
 
-            // Event Listeners para Ver Detalhes
-            document.querySelectorAll('.view-order-details').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const orderId = event.target.dataset.orderId;
-                    const selectedOrder = orders.find(order => order.id === orderId);
-                    if (selectedOrder) {
-                        populateTransacoesModal(selectedOrder);
-                        const transacoesModalEl = document.getElementById('transacoesModal');
-                        if (transacoesModalEl) {
-                            const transacoesModal = new bootstrap.Modal(transacoesModalEl);
-                            transacoesModal.show();
-                        }
-                    }
-                });
-            });
-
-            // Event Listeners para Realizar Troca/Devolução
-            document.querySelectorAll('.request-exchange').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    orderIdToExchange = event.target.dataset.orderId;
-                    const confirmOrderIdSpan = document.getElementById('confirm-order-id');
-                    if (confirmOrderIdSpan) {
-                        confirmOrderIdSpan.textContent = orderIdToExchange;
-                    }
-                    const confirmExchangeModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmExchangeModal'));
-                    confirmExchangeModal.show();
-                });
-            });
-        }
-    }
-
-    // Event Listener para o botão de confirmação dentro do modal
-    const confirmExchangeBtn = document.getElementById('confirm-exchange-btn');
-    if (confirmExchangeBtn) {
-        confirmExchangeBtn.addEventListener('click', () => {
-            if (orderIdToExchange) {
-                const orderIndex = orders.findIndex(order => order.id === orderIdToExchange);
-                if (orderIndex !== -1) {
-                    orders[orderIndex].status = 'EM TROCA';
-                    // localStorage.setItem('orders', JSON.stringify(orders));
-                    renderOrders(); // Re-renderiza a lista para refletir a mudança de status
-                    showAlert(`Pedido #${orderIdToExchange} em troca.`, 'info');
-                }
-                const confirmExchangeModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmExchangeModal'));
-                confirmExchangeModal.hide();
-                orderIdToExchange = null; // Limpa o ID do pedido após a ação
+            // Se sua API retorna apenas 1 pedido (não uma lista), ajustamos para um array
+            if (Array.isArray(data)) {
+                orders = data;
+            } else if (data && data.transacoes) {
+                orders = data.transacoes; // Exemplo: se o DTO tiver uma propriedade com as transações
+            } else {
+                orders = [data]; // Apenas um pedido
             }
-        });
-    }
 
-    function populateTransacoesModal(order) {
-        const modalTitle = document.getElementById('transacoesModalLabel');
-        if (modalTitle) modalTitle.textContent = `Detalhes do Pedido #${order.id}`;
+            renderOrders();
 
-        const modalBody = document.querySelector('#transacoesModal .modal-body');
-        if (modalBody) {
-            let itemsHtml = '';
-            order.items.forEach(item => {
-                itemsHtml += `
-                    <div class="table-responsive mb-3">
-                        <table class="table table-bordered table-striped">
-                            <tbody>
-                                <tr>
-                                    <th>Produto:</th>
-                                    <td>${item.product}</td>
-                                </tr>
-                                <tr>
-                                    <th>Marca:</th>
-                                    <td>${item.brand}</td>
-                                </tr>
-                                <tr>
-                                    <th>Esporte:</th>
-                                    <td>${item.sport}</td>
-                                </tr>
-                                <tr>
-                                    <th>Preço:</th>
-                                    <td>R$ ${item.price.toFixed(2)}</td>
-                                </tr>
-                                <tr>
-                                    <th>Quantidade:</th>
-                                    <td>${item.quantity}</td>
-                                </tr>
-                                <tr>
-                                    <th>Código do Produto:</th>
-                                    <td>${item.code}</td>
-                                </tr>
-                                <tr>
-                                    <th>Endereço de Entrega:</th>
-                                    <td>${item.deliveryAddress}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            });
-            modalBody.innerHTML = `
-                <p><strong>Data do Pedido:</strong> ${order.date}</p>
-                <p><strong>Total do Pedido:</strong> R$ ${order.total.toFixed(2)}</p>
-                <p><strong>Status:</strong> <span class="badge bg-primary">${order.status}</span></p>
-                <hr>
-                <h5>Itens do Pedido:</h5>
-                ${itemsHtml}
+        } catch (error) {
+            console.error("Erro ao carregar pedidos:", error);
+            ordersListContainer.innerHTML = `
+                <p class="text-danger text-center">Erro ao carregar pedidos. Verifique a conexão com o servidor.</p>
             `;
         }
     }
 
+    function renderOrders() {
+        if (!orders || orders.length === 0) {
+            ordersListContainer.innerHTML = '<p class="text-muted text-center">Nenhum pedido encontrado.</p>';
+            return;
+        }
+
+        ordersListContainer.innerHTML = '';
+        orders.forEach(order => {
+            const orderCard = document.createElement('div');
+            orderCard.classList.add('card', 'mb-3', 'shadow-sm');
+            orderCard.innerHTML = `
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Pedido #${order.id || order.idTransacao || '—'}</h5>
+                    <span class="badge bg-primary">${order.status || 'EM PROCESSAMENTO'}</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Data: ${formatDate(order.dataTransacao || order.date)}</p>
+                    <p class="card-text">Total: R$ ${(order.valorTotal || order.total || 0).toFixed(2)}</p>
+                    <button class="btn btn-sm btn-info me-2 view-order-details" data-order-id="${order.id || order.idTransacao}">Ver Detalhes</button>
+                    <button class="btn btn-sm btn-warning request-exchange" data-order-id="${order.id || order.idTransacao}">Realizar Troca/Devolução</button>
+                </div>
+            `;
+            ordersListContainer.appendChild(orderCard);
+        });
+
+        // Atribui os eventos dos botões
+        document.querySelectorAll('.view-order-details').forEach(button => {
+            button.addEventListener('click', e => {
+                const orderId = e.target.dataset.orderId;
+                const selectedOrder = orders.find(o => o.id == orderId || o.idTransacao == orderId);
+                if (selectedOrder) {
+                    populateTransacoesModal(selectedOrder);
+                    const modal = new bootstrap.Modal(document.getElementById('transacoesModal'));
+                    modal.show();
+                }
+            });
+        });
+
+        document.querySelectorAll('.request-exchange').forEach(button => {
+            button.addEventListener('click', e => {
+                orderIdToExchange = e.target.dataset.orderId;
+                const confirmOrderIdSpan = document.getElementById('confirm-order-id');
+                if (confirmOrderIdSpan) confirmOrderIdSpan.textContent = orderIdToExchange;
+                const confirmExchangeModal = new bootstrap.Modal(document.getElementById('confirmExchangeModal'));
+                confirmExchangeModal.show();
+            });
+        });
+    }
+
+    // Modal de detalhes
+    function populateTransacoesModal(order) {
+        const modalTitle = document.getElementById('transacoesModalLabel');
+        const modalBody = document.querySelector('#transacoesModal .modal-body');
+
+        if (modalTitle) modalTitle.textContent = `Detalhes do Pedido #${order.id || order.idTransacao}`;
+
+        if (modalBody) {
+            let itemsHtml = '';
+
+            // Se o backend retorna uma lista de itens, renderiza
+            if (order.itens && Array.isArray(order.itens)) {
+                order.itens.forEach(item => {
+                    itemsHtml += `
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered table-striped">
+                                <tbody>
+                                    <tr><th>Produto:</th><td>${item.nomeProduto || item.product}</td></tr>
+                                    <tr><th>Preço:</th><td>R$ ${(item.preco || item.price).toFixed(2)}</td></tr>
+                                    <tr><th>Quantidade:</th><td>${item.quantidade || item.quantity}</td></tr>
+                                    <tr><th>Código:</th><td>${item.codigoProduto || item.code}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                });
+            }
+
+            modalBody.innerHTML = `
+                <p><strong>Data do Pedido:</strong> ${formatDate(order.dataTransacao || order.date)}</p>
+                <p><strong>Total:</strong> R$ ${(order.valorTotal || order.total || 0).toFixed(2)}</p>
+                <p><strong>Status:</strong> <span class="badge bg-primary">${order.status || 'EM PROCESSAMENTO'}</span></p>
+                <hr>
+                <h5>Itens do Pedido:</h5>
+                ${itemsHtml || '<p>Nenhum item encontrado.</p>'}
+            `;
+        }
+    }
+
+    // Formata data YYYY-MM-DD -> DD/MM/YYYY
+    function formatDate(dateStr) {
+        if (!dateStr) return '—';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('pt-BR');
+    }
+
     // Inicialização
-    renderOrders();
+    await loadOrders();
 });
