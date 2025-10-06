@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return fetch(url)
             .then(response => response.text())
             .then(data => {
+                // Substituir placeholders de clienteId por 33 para testes
+                data = data.replace(/\$\{clienteId\}/g, '33');
+                
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data, 'text/html');
                 const content = doc.querySelector(selector);

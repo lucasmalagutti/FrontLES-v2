@@ -37,7 +37,7 @@ document.addEventListener('sharedContentLoaded', async () => {
     let appliedCoupons = []; // Array para múltiplos cupons
     let couponDiscount = 0;
 
-    const CLIENT_ID = 15; // ID do cliente para testes
+    const CLIENT_ID = 33; // ID do cliente para testes
 
     async function fetchAddresses(clientId) {
         try {
@@ -84,12 +84,23 @@ document.addEventListener('sharedContentLoaded', async () => {
     // Função para calcular o total considerando frete e cupons
     function calculateTotal() {
         let subtotal = 0;
-        let shippingCost = 10.00; // Valor fixo do frete
+        let shippingCost = 0;
         
         // Calcular subtotal dos produtos
         cart.forEach(item => {
             subtotal += item.price * item.quantity;
         });
+        
+        // Calcular frete baseado no estado do endereço selecionado
+        if (selectedAddress) {
+            if (selectedAddress.estado === 'SP') {
+                shippingCost = 10.00; // SP = R$ 10,00
+            } else {
+                shippingCost = 20.00; // Outros estados = R$ 20,00
+            }
+        } else {
+            shippingCost = 0.00; // Valor padrão se não houver endereço selecionado
+        }
         
         // Aplicar desconto dos cupons (se houver)
         let totalDiscountAmount = 0;
@@ -146,6 +157,7 @@ document.addEventListener('sharedContentLoaded', async () => {
                 addressDiv.querySelector('input').addEventListener('change', () => {
                     selectedAddress = address;
                     updatePlaceOrderButtonState();
+                    renderOrderSummary(); // Recalcular total com novo frete
                 });
                 savedAddressesContainer.appendChild(addressDiv);
             });
