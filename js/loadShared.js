@@ -53,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadComponent('modals/pagAdm/_cartoesModal.html', '#cartoesModal'),
         loadComponent('modals/pagAdm/_editarSenhaModal.html', '#editarSenhaModal'),
         loadComponent('modals/pagAdm/_transacoesModal.html', '#transacoesModal'),
-        loadComponent('modals/pagAdm/_confirmExchangeModal.html', '#confirmExchangeModal')
+        loadComponent('modals/pagAdm/_confirmExchangeModal.html', '#confirmExchangeModal'),
+        loadComponent('modals/solicitarTrocaModal.html', '#solicitarTrocaModal')
     ];
 
     Promise.all(fetches)

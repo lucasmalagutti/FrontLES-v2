@@ -144,6 +144,9 @@ document.addEventListener('sharedContentLoaded', async () => {
         if (appliedCoupons.includes('FRETEZERO')) {
             shippingCost = 0;
         }
+
+        let trocaCouponApplied = false;
+        let totalTrocaValue = 0;
         
         // Aplicar desconto dos cupons (se houver)
         let totalDiscountAmount = 0;
@@ -152,13 +155,28 @@ document.addEventListener('sharedContentLoaded', async () => {
         if (appliedCouponsData.length > 0) {
             // Para cada cupom aplicado, aplicar o desconto correspondente
             appliedCouponsData.forEach(cupomData => {
-                if (cupomData.nome.toUpperCase() !== 'FRETEZERO') {
+                const nomeCupom = cupomData.nome?.toUpperCase?.() || '';
+                if (nomeCupom.includes('TROCA')) {
+                    // Cupom de troca: valor fixo informado pelo backend
+                    const valorCupom = parseFloat(cupomData.desconto) || 0;
+                    if (valorCupom > 0) {
+                        totalTrocaValue += valorCupom;
+                    }
+                    trocaCouponApplied = true;
+                } else if (nomeCupom !== 'FRETEZERO') {
                     // Aplicar desconto percentual baseado no valor retornado pela API
                     totalDiscountAmount += subtotal * cupomData.desconto;
                 }
             });
             
             subtotalWithDiscount = subtotal - totalDiscountAmount;
+        }
+        
+        if (trocaCouponApplied) {
+            // Aplicar cupom de troca (valor fixo)
+            subtotalWithDiscount -= totalTrocaValue;
+            totalDiscountAmount += totalTrocaValue;
+            shippingCost = 0; // Frete grátis para cupons de troca
         }
         
         // Calcular total final (subtotal com desconto + frete)
@@ -470,12 +488,38 @@ document.addEventListener('sharedContentLoaded', async () => {
             const data = await response.json();
 
             if (response.ok && data.valido) {
+                // --- validações específicas para cupons de troca ---
+                const nomeCupomUpper = (data.nome || '').toUpperCase();
+                const isTrocaCoupon = nomeCupomUpper.includes('TROCA');
+                const valorCupom = parseFloat(data.desconto) || 0;
+                const subtotalAtual = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+                if (isTrocaCoupon) {
+                    if (valorCupom <= 0) {
+                        alert('Cupom de troca inválido ou sem valor disponível.');
+                        return;
+                    }
+
+                    if (valorCupom > subtotalAtual) {
+                        alert('Cupom de troca não pode ser utilizado pois o valor do pedido é inferior ao valor do cupom.');
+                        return;
+                    }
+
+                    const jaExisteCupomTroca = appliedCouponsData.some(c => c.nome?.toUpperCase?.().includes('TROCA'));
+                    if (jaExisteCupomTroca) {
+                        alert('Já existe um cupom de troca aplicado. Apenas um cupom de troca pode ser utilizado por compra.');
+                        return;
+                    }
+                }
+                // --- fim das validações ---
+
                 // Cupom válido - adicionar à lista de cupons aplicados
                 appliedCoupons.push(couponCode.toUpperCase());
-                appliedCouponsData.push({
-                    nome: data.nome,
-                    desconto: data.desconto
-                });
+            appliedCouponsData.push({
+                nome: data.nome,
+                desconto: data.desconto,
+                mensagem: data.mensagem || ''
+            });
                 
                 alert(`Cupom ${couponCode} aplicado com sucesso!`);
                 couponInput.value = '';
@@ -685,7 +729,8 @@ document.addEventListener('sharedContentLoaded', async () => {
                     valorTotal: totals.total,
                     valorFrete: totals.shippingCost,
                     enderecoId: selectedAddress.id,
-                    pagamentos: pagamentos
+                    pagamentos: pagamentos,
+                    cupons: appliedCouponsData.map(c => c.nome)
                 };
 
                 // Enviar transação para o backend

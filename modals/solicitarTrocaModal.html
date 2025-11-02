@@ -1,0 +1,59 @@
+<div class="modal fade" id="solicitarTrocaModal" tabindex="-1" aria-labelledby="solicitarTrocaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="solicitarTrocaModalLabel">Solicitar Troca ou Devolução</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="solicitarTrocaForm">
+                    <input type="hidden" id="troca-pedido-id" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Solicitação</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipoSolicitacao" id="tipoDevolucao" value="2" checked>
+                            <label class="form-check-label" for="tipoDevolucao">
+                                <strong>Devolução Completa</strong> - Devolver todo o pedido
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipoSolicitacao" id="tipoTroca" value="1">
+                            <label class="form-check-label" for="tipoTroca">
+                                <strong>Troca de Produto</strong> - Trocar apenas um item específico
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="selecaoItemContainer" class="mb-3" style="display: none;">
+                        <label class="form-label">Selecione o produto para troca:</label>
+                        <select class="form-select" id="item-pedido-select">
+                            <option value="">Selecione um item...</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="motivoTroca" class="form-label">
+                            <strong>Motivo da Solicitação</strong> <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="motivoTroca" rows="4" placeholder="Descreva o motivo da troca/devolução..." required></textarea>
+                        <small class="form-text text-muted">Máximo de 500 caracteres</small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Importante:</strong> A solicitação será analisada pelo administrador. 
+                        Você será notificado sobre a aprovação ou negação.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="btnEnviarSolicitacao">
+                    <i class="bi bi-send"></i> Enviar Solicitação
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
