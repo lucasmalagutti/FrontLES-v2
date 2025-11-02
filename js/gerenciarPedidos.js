@@ -4,95 +4,134 @@ function waitForBootstrap(callback) {
     if (typeof bootstrap !== 'undefined') {
         callback();
     } else {
-        // Aguardar um pouco e tentar novamente
         setTimeout(() => waitForBootstrap(callback), 100);
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Dados iniciais dos pedidos (sempre os mesmos para testes)
-    const pedidosIniciais = [
-        {
-            id: 'PED001',
-            cliente: 'Luiz Eduardo',
-            cpf: '29932381080',
-            email: 'luizeduardo@gmail.com',
-            data: '2023-10-26',
-            total: 299.80,
-            status: 'EM PROCESSAMENTO',
-            items: [
-                { produto: 'Bola de Futebol Nike', marca: 'Nike', esporte: 'Futebol', preco: 199.90, quantidade: 1, codigo: '0001' },
-                { produto: 'Cones', marca: 'Genérico', esporte: 'Futebol', preco: 99.90, quantidade: 1, codigo: '0002' }
-            ]
-        },
-        {
-            id: 'PED002',
-            cliente: 'Maria Silva',
-            cpf: '12345678901',
-            email: 'maria.silva@email.com',
-            data: '2023-10-25',
-            total: 129.90,
-            status: 'EM TROCA',
-            items: [
-                { produto: 'Bola de Basquete oficial', marca: 'Spalding', esporte: 'Basquete', preco: 129.90, quantidade: 1, codigo: '0005' }
-            ]
-        },
-        {
-            id: 'PED003',
-            cliente: 'João Santos',
-            cpf: '98765432100',
-            email: 'joao.santos@email.com',
-            data: '2023-10-24',
-            total: 449.90,
-            status: 'EM PROCESSAMENTO',
-            items: [
-                { produto: 'Aro', marca: 'Genérico', esporte: 'Basquete', preco: 399.90, quantidade: 1, codigo: '0007' },
-                { produto: 'Retornador de Bolas', marca: 'Genérico', esporte: 'Basquete', preco: 50.00, quantidade: 1, codigo: '0008' }
-            ]
-        }
-    ];
-
-    // Array para armazenar cupons gerados
+    let pedidos = [];
     let cupons = JSON.parse(localStorage.getItem('cupons')) || [];
 
-    // Carregar pedidos do localStorage ou usar dados iniciais
-    let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [...pedidosIniciais];
-    
-    // Verificar se é a primeira vez que a página é carregada
-    const primeiraVez = !localStorage.getItem('pedidos');
-    if (primeiraVez) {
-        // Se for a primeira vez, salvar os dados iniciais
-        localStorage.setItem('pedidos', JSON.stringify(pedidosIniciais));
-        pedidos = [...pedidosIniciais];
-    }
+    // ================================
+    // 🔹 Função principal: carregar pedidos do backend
+    // ================================
+    async function carregarPedidosDoBanco() {
+        try {
+            // 1️⃣ Buscar todas as transações
+            const response = await fetch("https://localhost:7280/Transacao/ListarTodos");
+            if (!response.ok) throw new Error(`Erro ao buscar pedidos: ${response.status}`);
+            const transacoes = await response.json();
 
-    // Salvar pedidos no localStorage
-    function salvarPedidos() {
-        localStorage.setItem('pedidos', JSON.stringify(pedidos));
-    }
+            // 2️⃣ Buscar todos os clientes (para exibir o nome, CPF, e-mail)
+            const clientesResponse = await fetch("https://localhost:7280/Cliente/Listar");
+            const clientes = clientesResponse.ok ? await clientesResponse.json() : [];
 
-    // Resetar pedidos para status inicial (para testes)
-    function resetarPedidos() {
-        // Confirmar com o usuário antes de resetar
-        if (confirm('Tem certeza que deseja resetar todos os pedidos para o status inicial?\n\nEsta ação irá:\n• Voltar PED001 para "EM PROCESSAMENTO"\n• Voltar PED002 para "EM TROCA"\n• Voltar PED003 para "EM PROCESSAMENTO"\n\nEsta ação não pode ser desfeita.')) {
-            pedidos = [...pedidosIniciais];
-            salvarPedidos();
+            // 3️⃣ Converter os dados do backend para o formato de exibição no front
+            pedidos = transacoes.map(transacao => {
+                const cliente = clientes.find(c => c.id === transacao.clienteId);
+                const nomeCliente = cliente ? cliente.nome : `Cliente #${transacao.clienteId}`;
+
+                return {
+                    id: transacao.pedidoId ?? transacao.id,
+                    cliente: nomeCliente,
+                    data: transacao.dataTransacao,
+                    total: transacao.valorTotal,
+                    status: obterDescricaoStatus(transacao.statusTransacao),
+                    items: (transacao.itens || []).map(item => ({
+                        produto: item.nomeProduto || "Produto",
+                        preco: item.precoUnitario || 0,
+                        quantidade: item.quantidade || 1
+                    }))
+                };
+            });
+
             renderizarPedidos();
-            showSuccessNotification('✅ Pedidos resetados com sucesso para o status inicial!');
+        } catch (error) {
+            console.error("Erro ao carregar pedidos:", error);
+            showAlert("Erro ao carregar pedidos do servidor.", "danger");
         }
     }
 
-    // Função para resetar pedidos (disponível globalmente)
-    window.resetarPedidos = resetarPedidos;
+    // ================================
+    // 🔹 Converter enum numérico para nome do status
+    // ================================
+    function obterDescricaoStatus(statusCodigo) {
+        // Se for null ou undefined, considerar como em processamento
+        if (statusCodigo === null || statusCodigo === undefined) {
+            return 'EM PROCESSAMENTO';
+        }
+        
+        // Se for string, mapear os valores do enum do backend
+        if (typeof statusCodigo === 'string') {
+            const statusMap = {
+                // Valores do enum como vêm do backend (PascalCase)
+                'EmProcessamento': 'EM PROCESSAMENTO',
+                'EmTransporte': 'EM TRANSPORTE',
+                'Entregue': 'ENTREGUE',
+                'EmTroca': 'EM TROCA',
+                'Trocado': 'TROCADO',
+                // Variações em maiúsculas/minúsculas
+                'EMPROCESSAMENTO': 'EM PROCESSAMENTO',
+                'EMTRANSPORTE': 'EM TRANSPORTE',
+                'ENTREGUE': 'ENTREGUE',
+                'EMTROCA': 'EM TROCA',
+                'TROCADO': 'TROCADO',
+                'emprocessamento': 'EM PROCESSAMENTO',
+                'emtransporte': 'EM TRANSPORTE',
+                'entregue': 'ENTREGUE',
+                'emtroca': 'EM TROCA',
+                'trocado': 'TROCADO',
+                // Formatos alternativos
+                'EM PROCESSAMENTO': 'EM PROCESSAMENTO',
+                'EM TRANSPORTE': 'EM TRANSPORTE',
+                'EM TROCA': 'EM TROCA'
+            };
+            
+            // Tentar encontrar o status no mapa
+            const statusKey = statusCodigo.trim();
+            if (statusMap[statusKey]) {
+                return statusMap[statusKey];
+            }
+            
+            // Tentar converter para número (caso venha como string numérica)
+            const codigoNum = parseInt(statusCodigo, 10);
+            if (!isNaN(codigoNum)) {
+                statusCodigo = codigoNum;
+            } else {
+                console.warn('Status string não reconhecido:', statusCodigo);
+                return 'DESCONHECIDO';
+            }
+        }
+        
+        // Tratar como número - valores do enum do backend
+        // EmProcessamento = 3, EmTransporte = 2, Entregue = 1, EmTroca = 4, Trocado = 5
+        switch (statusCodigo) {
+            case 1:
+                return 'ENTREGUE';
+            case 2:
+                return 'EM TRANSPORTE';
+            case 3:
+                return 'EM PROCESSAMENTO';
+            case 4:
+                return 'EM TROCA';
+            case 5:
+                return 'TROCADO';
+            default:
+                console.warn('Status desconhecido recebido:', statusCodigo, 'tipo:', typeof statusCodigo);
+                return 'DESCONHECIDO';
+        }
+    }
 
-    // Renderizar tabela de pedidos
+    // ================================
+    // 🔹 Renderização da tabela de pedidos
+    // ================================
     function renderizarPedidos(filtroStatus = 'todos') {
         const tbody = document.getElementById('pedidosTableBody');
         if (!tbody) return;
 
         let pedidosFiltrados = pedidos;
         if (filtroStatus !== 'todos') {
-            pedidosFiltrados = pedidos.filter(pedido => pedido.status === filtroStatus);
+            pedidosFiltrados = pedidos.filter(p => p.status === filtroStatus);
         }
 
         if (pedidosFiltrados.length === 0) {
@@ -103,15 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = '';
         pedidosFiltrados.forEach(pedido => {
             const tr = document.createElement('tr');
-            
-            // Determinar cor do badge baseado no status
+
+            // Determinar cor do badge
             let badgeClass = 'bg-secondary';
             if (pedido.status === 'EM PROCESSAMENTO') badgeClass = 'bg-warning';
-            else if (pedido.status === 'EM TROCA') badgeClass = 'bg-danger';
-            else if (pedido.status === 'EM TRANSITO') badgeClass = 'bg-info';
+            else if (pedido.status === 'EM TRANSPORTE') badgeClass = 'bg-info';
             else if (pedido.status === 'ENTREGUE') badgeClass = 'bg-success';
-            else if (pedido.status === 'TROCA AUTORIZADA') badgeClass = 'bg-primary';
-            else if (pedido.status === 'ITENS RECEBIDOS') badgeClass = 'bg-success';
+            else if (pedido.status === 'EM TROCA') badgeClass = 'bg-danger';
+            else if (pedido.status === 'TROCADO') badgeClass = 'bg-primary';
 
             tr.innerHTML = `
                 <td>${pedido.id}</td>
@@ -124,388 +162,236 @@ document.addEventListener('DOMContentLoaded', () => {
                         Ver Itens
                     </button>
                 </td>
-                <td>
-                    ${getBotoesAcao(pedido)}
-                </td>
+                <td>${getBotoesAcao(pedido)}</td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // Gerar botões de ação baseado no status do pedido
+    // ================================
+    // 🔹 Função de botões de ação
+    // ================================
     function getBotoesAcao(pedido) {
-        let botoes = '';
+        const buttons = [];
         
+        // EM PROCESSAMENTO: Definir como em transporte
         if (pedido.status === 'EM PROCESSAMENTO') {
-            botoes = `
-                <button class="btn btn-sm btn-success me-1" onclick="aceitarPedido('${pedido.id}')">
-                    Aceitar Pedido
-                </button>
-            `;
-        } else if (pedido.status === 'EM TRANSITO') {
-            botoes = `
-                <button class="btn btn-sm btn-success me-1" onclick="aceitarPedido('${pedido.id}')">
-                    Confirmar Entrega
-                </button>
-            `;
-        } else if (pedido.status === 'EM TROCA') {
-            botoes = `
-                <button class="btn btn-sm btn-success me-1" onclick="autorizarTroca('${pedido.id}')">
-                    Autorizar Troca
-                </button>
-            `;
-        } else if (pedido.status === 'TROCA AUTORIZADA') {
-            botoes = `
-                <button class="btn btn-sm btn-info me-1" onclick="confirmarChegadaItens('${pedido.id}')">
-                    <i class="bi bi-box-seam"></i> Confirmar Chegada dos Itens
-                </button>
-            `;
-        } else {
-            botoes = '<span class="text-muted">Nenhuma ação disponível</span>';
+            buttons.push(`<button class="btn btn-sm btn-info me-1" onclick="definirEmTransporte('${pedido.id}')">
+                <i class="bi bi-truck"></i> Definir em Transporte
+            </button>`);
         }
         
-        return botoes;
+        // EM TRANSPORTE: Confirmar entrega
+        if (pedido.status === 'EM TRANSPORTE') {
+            buttons.push(`<button class="btn btn-sm btn-success me-1" onclick="confirmarEntrega('${pedido.id}')">
+                <i class="bi bi-check-circle-fill"></i> Confirmar Entrega
+            </button>`);
+        }
+        
+        // EM TROCA: Aceitar ou negar troca/devolução
+        if (pedido.status === 'EM TROCA') {
+            buttons.push(`<button class="btn btn-sm btn-success me-1" onclick="autorizarTroca('${pedido.id}')">
+                <i class="bi bi-check-circle"></i> Autorizar Troca
+            </button>`);
+            buttons.push(`<button class="btn btn-sm btn-danger me-1" onclick="negarTroca('${pedido.id}')">
+                <i class="bi bi-x-circle"></i> Negar Troca
+            </button>`);
+        }
+        
+        // TROCADO: Status final após troca autorizada e processada
+        // Não precisa de ação, é um status final
+        
+        return buttons.length > 0 ? buttons.join('') : '<span class="text-muted">Nenhuma ação disponível</span>';
     }
 
-    // Aceitar pedido (muda status de EM PROCESSAMENTO para EM TRANSITO, ou de EM TRANSITO para ENTREGUE)
-    window.aceitarPedido = function(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (!pedido) return;
-
-        if (pedido.status === 'EM PROCESSAMENTO') {
-            pedido.status = 'EM TRANSITO';
-            showSuccessNotification(`Pedido ${pedidoId} aceito e enviado para entrega!`);
-        } else if (pedido.status === 'EM TRANSITO') {
-            pedido.status = 'ENTREGUE';
-            showSuccessNotification(`Pedido ${pedidoId} entregue com sucesso!`);
-        }
-
-        salvarPedidos();
-        renderizarPedidos();
-    };
-
-    // Autorizar troca (muda status de EM TROCA para TROCA AUTORIZADA)
-    window.autorizarTroca = function(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (!pedido) return;
-
-        // Verificar se o Bootstrap está disponível
-        if (typeof bootstrap === 'undefined') {
-            console.error('Bootstrap não está disponível');
-            showAlert('Erro: Bootstrap não está carregado', 'danger');
+    // ================================
+    // 🔹 Funções auxiliares de ações
+    // ================================
+    
+    // Definir produto em transporte (EM PROCESSAMENTO -> EM TRANSPORTE)
+    window.definirEmTransporte = async function (pedidoId) {
+        const pedido = pedidos.find(p => p.id == pedidoId);
+        if (!pedido) {
+            showAlert('Pedido não encontrado.', 'danger');
             return;
         }
-
-        // Fechar modal de gerenciar pedidos primeiro
-        const gerenciarModal = bootstrap.Modal.getInstance(document.getElementById('gerenciarPedidosModal'));
-        if (gerenciarModal) {
-            gerenciarModal.hide();
-        }
-
-        // Mostrar modal de confirmação
-        const confirmarModal = document.getElementById('confirmarTrocaModal');
-        if (confirmarModal) {
-            document.getElementById('pedidoTrocaConfirmId').textContent = pedidoId;
+        
+        try {
+            // TODO: Implementar chamada ao backend quando o endpoint estiver disponível
+            // const response = await fetch(`https://localhost:7280/Transacao/AtualizarStatus/${pedidoId}`, {
+            //     method: 'PUT',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ statusTransacao: 2 }) // EmTransporte = 2
+            // });
+            // if (!response.ok) throw new Error('Erro ao definir em transporte');
             
-            try {
-                // Usar Bootstrap.Modal.getOrCreateInstance para evitar erros
-                const modal = bootstrap.Modal.getOrCreateInstance(confirmarModal);
-                modal.show();
-                
-                // Configurar o botão de confirmação
-                const confirmarBtn = document.getElementById('confirmarTrocaBtn');
-                if (confirmarBtn) {
-                    // Remover event listeners anteriores para evitar duplicação
-                    const newBtn = confirmarBtn.cloneNode(true);
-                    confirmarBtn.parentNode.replaceChild(newBtn, confirmarBtn);
-                    
-                    newBtn.addEventListener('click', () => {
-                        // Executar a autorização da troca
-                        executarAutorizacaoTroca(pedidoId);
-                        
-                        // Fechar modal de confirmação
-                        modal.hide();
-                    });
-                }
-            } catch (error) {
-                console.error('Erro ao abrir modal:', error);
-                showAlert('Erro ao abrir modal de confirmação', 'danger');
-            }
-        } else {
-            console.error('Modal de confirmação não encontrado');
-            showAlert('Erro: Modal de confirmação não encontrado', 'danger');
+            pedido.status = 'EM TRANSPORTE';
+            renderizarPedidos();
+            showSuccessNotification(`Pedido ${pedidoId} definido como em transporte!`);
+        } catch (error) {
+            console.error('Erro ao definir em transporte:', error);
+            showAlert('Erro ao definir pedido em transporte. Tente novamente.', 'danger');
         }
     };
-
-    // Função para executar a autorização da troca após confirmação
-    function executarAutorizacaoTroca(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (!pedido) return;
-
-        pedido.status = 'TROCA AUTORIZADA';
-        
-        salvarPedidos();
-        renderizarPedidos();
-        
-        // Mostrar notificação de sucesso
-        showSuccessNotification(`Troca do pedido ${pedidoId} autorizada com sucesso!`);
-    }
-
-    // Função para confirmar chegada dos itens e gerar cupom
-    window.confirmarChegadaItens = function(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (!pedido) return;
-
-        // Verificar se o Bootstrap está disponível
-        if (typeof bootstrap === 'undefined') {
-            console.error('Bootstrap não está disponível');
-            showAlert('Erro: Bootstrap não está carregado', 'danger');
+    
+    // Confirmar entrega (EM TRANSPORTE -> ENTREGUE)
+    window.confirmarEntrega = async function (pedidoId) {
+        const pedido = pedidos.find(p => p.id == pedidoId);
+        if (!pedido) {
+            showAlert('Pedido não encontrado.', 'danger');
             return;
         }
-
-        // Fechar modal de gerenciar pedidos primeiro
-        const gerenciarModal = bootstrap.Modal.getInstance(document.getElementById('gerenciarPedidosModal'));
-        if (gerenciarModal) {
-            gerenciarModal.hide();
+        
+        try {
+            // TODO: Implementar chamada ao backend quando o endpoint estiver disponível
+            // const response = await fetch(`https://localhost:7280/Transacao/AtualizarStatus/${pedidoId}`, {
+            //     method: 'PUT',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ statusTransacao: 1 }) // Entregue = 1
+            // });
+            // if (!response.ok) throw new Error('Erro ao confirmar entrega');
+            
+            pedido.status = 'ENTREGUE';
+            renderizarPedidos();
+            showSuccessNotification(`Entrega do pedido ${pedidoId} confirmada!`);
+        } catch (error) {
+            console.error('Erro ao confirmar entrega:', error);
+            showAlert('Erro ao confirmar entrega. Tente novamente.', 'danger');
         }
-
-        // Preencher dados no modal de confirmação
-        document.getElementById('pedidoChegadaId').textContent = pedidoId;
-        document.getElementById('clienteChegadaId').textContent = pedido.cliente;
-
-        // Mostrar modal de confirmação de chegada
-        const confirmarModal = document.getElementById('confirmarChegadaItensModal');
-        if (confirmarModal) {
-            try {
-                const modal = bootstrap.Modal.getOrCreateInstance(confirmarModal);
-                modal.show();
-                
-                // Configurar o botão de confirmação
-                const confirmarBtn = document.getElementById('confirmarChegadaBtn');
-                if (confirmarBtn) {
-                    // Remover event listeners anteriores para evitar duplicação
-                    const newBtn = confirmarBtn.cloneNode(true);
-                    confirmarBtn.parentNode.replaceChild(newBtn, confirmarBtn);
-                    
-                    newBtn.addEventListener('click', () => {
-                        // Executar a confirmação e gerar cupom
-                        executarConfirmacaoChegada(pedidoId);
-                        
-                        // Fechar modal de confirmação
-                        modal.hide();
-                    });
-                }
-            } catch (error) {
-                console.error('Erro ao abrir modal:', error);
-                showAlert('Erro ao abrir modal de confirmação', 'danger');
-            }
+    };
+    
+    // Autorizar troca/devolução (EM TROCA -> TROCADO)
+    window.autorizarTroca = async function (pedidoId) {
+        const pedido = pedidos.find(p => p.id == pedidoId);
+        if (!pedido) {
+            showAlert('Pedido não encontrado.', 'danger');
+            return;
+        }
+        
+        // Confirmar ação
+        const confirmar = confirm(`Deseja realmente autorizar a troca/devolução do pedido ${pedidoId}?`);
+        if (!confirmar) return;
+        
+        try {
+            // TODO: Implementar chamada ao backend quando o endpoint estiver disponível
+            // const response = await fetch(`https://localhost:7280/Transacao/AtualizarStatus/${pedidoId}`, {
+            //     method: 'PUT',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ statusTransacao: 5 }) // Trocado = 5
+            // });
+            // if (!response.ok) throw new Error('Erro ao autorizar troca');
+            
+            pedido.status = 'TROCADO';
+            renderizarPedidos();
+            showSuccessNotification(`Troca do pedido ${pedidoId} autorizada e processada!`);
+        } catch (error) {
+            console.error('Erro ao autorizar troca:', error);
+            showAlert('Erro ao autorizar troca. Tente novamente.', 'danger');
+        }
+    };
+    
+    // Negar troca/devolução (EM TROCA -> volta para EM PROCESSAMENTO ou ENTREGUE)
+    window.negarTroca = async function (pedidoId) {
+        const pedido = pedidos.find(p => p.id == pedidoId);
+        if (!pedido) {
+            showAlert('Pedido não encontrado.', 'danger');
+            return;
+        }
+        
+        // Confirmar ação
+        const confirmar = confirm(`Deseja realmente negar a troca/devolução do pedido ${pedidoId}?`);
+        if (!confirmar) return;
+        
+        try {
+            // TODO: Implementar chamada ao backend quando o endpoint estiver disponível
+            // A lógica do backend pode variar - pode voltar para o status anterior ou manter EM TROCA
+            // const response = await fetch(`https://localhost:7280/Transacao/NegarTroca/${pedidoId}`, {
+            //     method: 'PUT'
+            // });
+            // if (!response.ok) throw new Error('Erro ao negar troca');
+            
+            // Por enquanto, apenas removemos o status de troca (volta para processamento)
+            // O backend deve definir a lógica correta
+            showSuccessNotification(`Troca do pedido ${pedidoId} negada. O pedido permanece em análise.`);
+            // Recarregar pedidos do backend para obter o status atualizado
+            await carregarPedidosDoBanco();
+        } catch (error) {
+            console.error('Erro ao negar troca:', error);
+            showAlert('Erro ao negar troca. Tente novamente.', 'danger');
         }
     };
 
-    // Função para executar a confirmação de chegada e gerar cupom
-    function executarConfirmacaoChegada(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
+    // ================================
+    // 🔹 Exibir detalhes do pedido
+    // ================================
+    window.verDetalhesPedido = function (pedidoId) {
+        const pedido = pedidos.find(p => p.id == pedidoId);
         if (!pedido) return;
-
-        // Obter observações
-        const observacoes = document.getElementById('observacoesItens').value || 'Nenhuma observação';
-
-        // Gerar cupom
-        const cupom = gerarCupom(pedido, observacoes);
-        
-        // Atualizar status do pedido
-        pedido.status = 'ITENS RECEBIDOS';
-        pedido.observacoesTroca = observacoes;
-        pedido.cupomGerado = cupom.codigo;
-        
-        salvarPedidos();
-        renderizarPedidos();
-        
-        // Mostrar modal com o cupom gerado
-        mostrarCupomGerado(cupom);
-        
-        // Mostrar notificação de sucesso
-        showSuccessNotification(`Cupom de troca gerado com sucesso para o pedido ${pedidoId}!`);
-    }
-
-    // Função para gerar cupom de troca
-    function gerarCupom(pedido, observacoes) {
-        const codigo = 'CUP' + Date.now().toString().slice(-6);
-        const dataGeracao = new Date().toISOString();
-        
-        const cupom = {
-            codigo: codigo,
-            pedidoId: pedido.id,
-            cliente: pedido.cliente,
-            valor: pedido.total,
-            dataGeracao: dataGeracao,
-            observacoes: observacoes,
-            status: 'ATIVO'
-        };
-        
-        cupons.push(cupom);
-        localStorage.setItem('cupons', JSON.stringify(cupons));
-        
-        return cupom;
-    }
-
-    // Função para mostrar o cupom gerado
-    function mostrarCupomGerado(cupom) {
-        // Preencher dados do cupom no modal
-        document.getElementById('codigoCupom').textContent = cupom.codigo;
-        document.getElementById('dataCupom').textContent = new Date(cupom.dataGeracao).toLocaleDateString('pt-BR');
-        document.getElementById('pedidoCupom').textContent = cupom.pedidoId;
-        document.getElementById('clienteCupom').textContent = cupom.cliente;
-        document.getElementById('valorCupom').textContent = `R$ ${cupom.valor.toFixed(2)}`;
-        
-        // Mostrar modal do cupom
-        const cupomModal = document.getElementById('cupomGeradoModal');
-        if (cupomModal) {
-            const modal = bootstrap.Modal.getOrCreateInstance(cupomModal);
-            modal.show();
-        }
-    }
-
-    // Função para imprimir cupom (disponível globalmente)
-    window.imprimirCupom = function() {
-        const conteudo = document.getElementById('cupomGeradoModal').innerHTML;
-        const janela = window.open('', '_blank');
-        janela.document.write(`
-            <html>
-                <head>
-                    <title>Cupom de Troca</title>
-                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-                    <style>
-                        @media print {
-                            .btn { display: none !important; }
-                            .modal-footer { display: none !important; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${conteudo}
-                    <script>window.print();</script>
-                </body>
-            </html>
-        `);
-        janela.document.close();
-    };
-
-    // Ver detalhes do pedido
-    window.verDetalhesPedido = function(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (!pedido) return;
-
-        // Usar o modal de transações existente para mostrar detalhes
-        const modalTitle = document.getElementById('transacoesModalLabel');
-        if (modalTitle) modalTitle.textContent = `Detalhes do Pedido #${pedido.id}`;
 
         const modalBody = document.querySelector('#transacoesModal .modal-body');
+        const modalTitle = document.getElementById('transacoesModalLabel');
+
+        if (modalTitle) modalTitle.textContent = `Detalhes do Pedido #${pedido.id}`;
+
         if (modalBody) {
-            let itemsHtml = '';
-            pedido.items.forEach(item => {
-                itemsHtml += `
-                    <div class="table-responsive mb-3">
-                        <table class="table table-bordered table-striped">
-                            <tbody>
-                                <tr>
-                                    <th>Produto:</th>
-                                    <td>${item.produto}</td>
-                                </tr>
-                                <tr>
-                                    <th>Marca:</th>
-                                    <td>${item.marca}</td>
-                                </tr>
-                                <tr>
-                                    <th>Esporte:</th>
-                                    <td>${item.esporte}</td>
-                                </tr>
-                                <tr>
-                                    <th>Preço:</th>
-                                    <td>R$ ${item.preco.toFixed(2)}</td>
-                                </tr>
-                                <tr>
-                                    <th>Quantidade:</th>
-                                    <td>${item.quantidade}</td>
-                                </tr>
-                                <tr>
-                                    <th>Código do Produto:</th>
-                                    <td>${item.codigo}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            });
+            let itemsHtml = pedido.items.map(item => `
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-striped">
+                        <tbody>
+                            <tr><th>Produto:</th><td>${item.produto}</td></tr>
+                            <tr><th>Preço unitário:</th><td>R$ ${item.preco.toFixed(2)}</td></tr>
+                            <tr><th>Quantidade:</th><td>${item.quantidade}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `).join('');
+
             modalBody.innerHTML = `
                 <p><strong>Cliente:</strong> ${pedido.cliente}</p>
-                <p><strong>CPF:</strong> ${pedido.cpf}</p>
-                <p><strong>Email:</strong> ${pedido.email}</p>
-                <p><strong>Data do Pedido:</strong> ${new Date(pedido.data).toLocaleDateString('pt-BR')}</p>
-                <p><strong>Total do Pedido:</strong> R$ ${pedido.total.toFixed(2)}</p>
+                <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleDateString('pt-BR')}</p>
+                <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
                 <p><strong>Status:</strong> <span class="badge bg-primary">${pedido.status}</span></p>
-                <hr>
-                <h5>Itens do Pedido:</h5>
-                ${itemsHtml}
+                <hr><h5>Itens:</h5>${itemsHtml}
             `;
         }
 
-        // Fechar modal de gerenciar pedidos e abrir modal de detalhes
-        const gerenciarModal = bootstrap.Modal.getInstance(document.getElementById('gerenciarPedidosModal'));
-        if (gerenciarModal) gerenciarModal.hide();
-
-        const transacoesModal = new bootstrap.Modal(document.getElementById('transacoesModal'));
-        transacoesModal.show();
+        const modal = new bootstrap.Modal(document.getElementById('transacoesModal'));
+        modal.show();
     };
 
-    // Event listeners para filtros de status
-    document.addEventListener('change', (e) => {
-        if (e.target.name === 'statusFilter') {
-            renderizarPedidos(e.target.value);
-        }
-    });
-
-    // Função para mostrar alertas
+    // ================================
+    // 🔹 Alertas e notificações
+    // ================================
     function showAlert(message, type = 'info') {
-        // Criar elemento de alerta
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
         alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
+        alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
         document.body.appendChild(alertDiv);
-        
-        // Remover alerta após 5 segundos
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 5000);
+        setTimeout(() => alertDiv.remove(), 5000);
     }
 
-    // Função para mostrar notificação de sucesso
     function showSuccessNotification(message) {
         showAlert(message, 'success');
     }
 
-    // Inicializar quando o modal for aberto
+    // ================================
+    // 🔹 Inicialização
+    // ================================
     waitForBootstrap(() => {
-        const gerenciarPedidosModal = document.getElementById('gerenciarPedidosModal');
-        if (gerenciarPedidosModal) {
-            gerenciarPedidosModal.addEventListener('shown.bs.modal', () => {
-                renderizarPedidos();
+        const gerenciarModal = document.getElementById('gerenciarPedidosModal');
+        if (gerenciarModal) {
+            gerenciarModal.addEventListener('shown.bs.modal', carregarPedidosDoBanco);
+        }
+        
+        // Adicionar listeners para os filtros de status
+        const statusFilters = document.querySelectorAll('input[name="statusFilter"]');
+        statusFilters.forEach(filter => {
+            filter.addEventListener('change', (e) => {
+                renderizarPedidos(e.target.value);
             });
-        }
-
-        // Também inicializar quando a página carregar (para casos onde o modal já estiver aberto)
-        if (document.getElementById('gerenciarPedidosModal')) {
-            renderizarPedidos();
-        }
+        });
+        
+        carregarPedidosDoBanco(); // Carrega também ao abrir a página
     });
-
-    // Comentário: Reset automático removido - agora apenas manual através do botão
-    // Os pedidos mantêm seus status até que o usuário clique em "Resetar Pedidos"
 });

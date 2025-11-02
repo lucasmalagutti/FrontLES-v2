@@ -9,18 +9,28 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <h6>Filtrar por Status:</h6>
-                    <div class="btn-group" role="group">
+                    <div class="btn-group flex-wrap" role="group">
                         <input type="radio" class="btn-check" name="statusFilter" id="todos" value="todos" checked>
                         <label class="btn btn-outline-primary" for="todos">Todos</label>
-                        
-                        <input type="radio" class="btn-check" name="statusFilter" id="emProcessamento" value="EM PROCESSAMENTO">
+
+                        <input type="radio" class="btn-check" name="statusFilter" id="emProcessamento"
+                            value="EM PROCESSAMENTO">
                         <label class="btn btn-outline-warning" for="emProcessamento">Em Processamento</label>
-                        
+
+                        <input type="radio" class="btn-check" name="statusFilter" id="emTransporte" value="EM TRANSPORTE">
+                        <label class="btn btn-outline-info" for="emTransporte">Em Transporte</label>
+
+                        <input type="radio" class="btn-check" name="statusFilter" id="entregue" value="ENTREGUE">
+                        <label class="btn btn-outline-success" for="entregue">Entregue</label>
+
                         <input type="radio" class="btn-check" name="statusFilter" id="emTroca" value="EM TROCA">
                         <label class="btn btn-outline-danger" for="emTroca">Em Troca</label>
+
+                        <input type="radio" class="btn-check" name="statusFilter" id="trocado" value="TROCADO">
+                        <label class="btn btn-outline-primary" for="trocado">Trocado</label>
                     </div>
                 </div>
-                
+
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped" id="pedidosTable">
                         <thead>
@@ -41,9 +51,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-warning me-2" onclick="resetarPedidos()">
-                    <i class="bi bi-arrow-clockwise"></i> Resetar Pedidos para Status Inicial
-                </button>
+
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
