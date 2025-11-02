@@ -17,8 +17,8 @@
                             value="EM PROCESSAMENTO">
                         <label class="btn btn-outline-warning" for="emProcessamento">Em Processamento</label>
 
-                        <input type="radio" class="btn-check" name="statusFilter" id="emTransporte" value="EM TRANSPORTE">
-                        <label class="btn btn-outline-info" for="emTransporte">Em Transporte</label>
+                        <input type="radio" class="btn-check" name="statusFilter" id="emTransito" value="EM TRANSITO">
+                        <label class="btn btn-outline-info" for="emTransito">Em Trânsito</label>
 
                         <input type="radio" class="btn-check" name="statusFilter" id="entregue" value="ENTREGUE">
                         <label class="btn btn-outline-success" for="entregue">Entregue</label>
@@ -26,8 +26,13 @@
                         <input type="radio" class="btn-check" name="statusFilter" id="emTroca" value="EM TROCA">
                         <label class="btn btn-outline-danger" for="emTroca">Em Troca</label>
 
-                        <input type="radio" class="btn-check" name="statusFilter" id="trocado" value="TROCADO">
-                        <label class="btn btn-outline-primary" for="trocado">Trocado</label>
+                        <input type="radio" class="btn-check" name="statusFilter" id="trocaAutorizada"
+                            value="TROCA AUTORIZADA">
+                        <label class="btn btn-outline-primary" for="trocaAutorizada">Troca Autorizada</label>
+
+                        <input type="radio" class="btn-check" name="statusFilter" id="itensRecebidos"
+                            value="ITENS RECEBIDOS">
+                        <label class="btn btn-outline-success" for="itensRecebidos">Itens Recebidos</label>
                     </div>
                 </div>
 
@@ -40,6 +45,7 @@
                                 <th>Data</th>
                                 <th>Total</th>
                                 <th>Status</th>
+                                <th>Alterar Status</th>
                                 <th>Itens</th>
                                 <th>Ações</th>
                             </tr>
@@ -51,7 +57,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-
+                <button type="button" class="btn btn-warning me-2" onclick="resetarPedidos()">
+                    <i class="bi bi-arrow-clockwise"></i> Recarregar Pedidos
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>

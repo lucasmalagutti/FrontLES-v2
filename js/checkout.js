@@ -42,15 +42,39 @@ document.addEventListener('sharedContentLoaded', async () => {
 
     // Função centralizada para mapear bandeiras de cartão
     function getBandeiraNome(bandeiraValue) {
-        const bandeiraMap = {
-            1: 'Visa',
-            2: 'Mastercard', // Exibindo como "Mastercard" mesmo que o enum seja "Mastercad"
-            3: 'American Express',
-            4: 'Elo',
-            5: 'HiperCard',
-            6: 'Aura'
-        };
-        return bandeiraMap[bandeiraValue] || 'Desconhecida';
+        // Se for null ou undefined, retornar Desconhecida
+        if (bandeiraValue === null || bandeiraValue === undefined) {
+            return 'Desconhecida';
+        }
+        
+        // Se for uma string (nome do enum do backend)
+        if (typeof bandeiraValue === 'string') {
+            const bandeiraStringMap = {
+                'Visa': 'Visa',
+                'Mastercad': 'Mastercard', // O backend retorna "Mastercad" mas exibimos "Mastercard"
+                'Mastercard': 'Mastercard',
+                'AmericanExpress': 'American Express',
+                'Elo': 'Elo',
+                'HiperCard': 'HiperCard',
+                'Aura': 'Aura'
+            };
+            return bandeiraStringMap[bandeiraValue] || bandeiraValue || 'Desconhecida';
+        }
+        
+        // Se for um número (valor do enum)
+        if (typeof bandeiraValue === 'number') {
+            const bandeiraMap = {
+                1: 'Visa',
+                2: 'Mastercard', // Exibindo como "Mastercard" mesmo que o enum seja "Mastercad"
+                3: 'American Express',
+                4: 'Elo',
+                5: 'HiperCard',
+                6: 'Aura'
+            };
+            return bandeiraMap[bandeiraValue] || 'Desconhecida';
+        }
+        
+        return 'Desconhecida';
     }
 
     async function fetchAddresses(clientId) {
@@ -120,6 +144,9 @@ document.addEventListener('sharedContentLoaded', async () => {
         if (appliedCoupons.includes('FRETEZERO')) {
             shippingCost = 0;
         }
+
+        let trocaCouponApplied = false;
+        let totalTrocaValue = 0;
         
         // Aplicar desconto dos cupons (se houver)
         let totalDiscountAmount = 0;
@@ -128,13 +155,28 @@ document.addEventListener('sharedContentLoaded', async () => {
         if (appliedCouponsData.length > 0) {
             // Para cada cupom aplicado, aplicar o desconto correspondente
             appliedCouponsData.forEach(cupomData => {
-                if (cupomData.nome.toUpperCase() !== 'FRETEZERO') {
+                const nomeCupom = cupomData.nome?.toUpperCase?.() || '';
+                if (nomeCupom.includes('TROCA')) {
+                    // Cupom de troca: valor fixo informado pelo backend
+                    const valorCupom = parseFloat(cupomData.desconto) || 0;
+                    if (valorCupom > 0) {
+                        totalTrocaValue += valorCupom;
+                    }
+                    trocaCouponApplied = true;
+                } else if (nomeCupom !== 'FRETEZERO') {
                     // Aplicar desconto percentual baseado no valor retornado pela API
                     totalDiscountAmount += subtotal * cupomData.desconto;
                 }
             });
             
             subtotalWithDiscount = subtotal - totalDiscountAmount;
+        }
+        
+        if (trocaCouponApplied) {
+            // Aplicar cupom de troca (valor fixo)
+            subtotalWithDiscount -= totalTrocaValue;
+            totalDiscountAmount += totalTrocaValue;
+            shippingCost = 0; // Frete grátis para cupons de troca
         }
         
         // Calcular total final (subtotal com desconto + frete)
@@ -183,7 +225,9 @@ document.addEventListener('sharedContentLoaded', async () => {
                 const cardDiv = document.createElement('div');
                 cardDiv.classList.add('list-group-item', 'd-flex', 'align-items-center');
 
-                const bandeiraNome = getBandeiraNome(card.bandeira);
+                // Priorizar bandeiraNome se disponível, senão usar bandeira
+                const bandeiraValue = card.bandeiraNome || card.bandeira;
+                const bandeiraNome = getBandeiraNome(bandeiraValue);
 
                 const isSelected = selectedCards.some(selected => selected.id === card.id);
                 
@@ -253,7 +297,9 @@ document.addEventListener('sharedContentLoaded', async () => {
             container.innerHTML = '';
             
             selectedCards.forEach((card, index) => {
-                const bandeiraNome = getBandeiraNome(card.bandeira);
+                // Priorizar bandeiraNome se disponível, senão usar bandeira
+                const bandeiraValue = card.bandeiraNome || card.bandeira;
+                const bandeiraNome = getBandeiraNome(bandeiraValue);
                 
                 // Preservar valor existente se disponível
                 const preservedValue = existingValues[card.id] || '';
@@ -442,12 +488,38 @@ document.addEventListener('sharedContentLoaded', async () => {
             const data = await response.json();
 
             if (response.ok && data.valido) {
+                // --- validações específicas para cupons de troca ---
+                const nomeCupomUpper = (data.nome || '').toUpperCase();
+                const isTrocaCoupon = nomeCupomUpper.includes('TROCA');
+                const valorCupom = parseFloat(data.desconto) || 0;
+                const subtotalAtual = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+                if (isTrocaCoupon) {
+                    if (valorCupom <= 0) {
+                        alert('Cupom de troca inválido ou sem valor disponível.');
+                        return;
+                    }
+
+                    if (valorCupom > subtotalAtual) {
+                        alert('Cupom de troca não pode ser utilizado pois o valor do pedido é inferior ao valor do cupom.');
+                        return;
+                    }
+
+                    const jaExisteCupomTroca = appliedCouponsData.some(c => c.nome?.toUpperCase?.().includes('TROCA'));
+                    if (jaExisteCupomTroca) {
+                        alert('Já existe um cupom de troca aplicado. Apenas um cupom de troca pode ser utilizado por compra.');
+                        return;
+                    }
+                }
+                // --- fim das validações ---
+
                 // Cupom válido - adicionar à lista de cupons aplicados
                 appliedCoupons.push(couponCode.toUpperCase());
-                appliedCouponsData.push({
-                    nome: data.nome,
-                    desconto: data.desconto
-                });
+            appliedCouponsData.push({
+                nome: data.nome,
+                desconto: data.desconto,
+                mensagem: data.mensagem || ''
+            });
                 
                 alert(`Cupom ${couponCode} aplicado com sucesso!`);
                 couponInput.value = '';
@@ -657,7 +729,8 @@ document.addEventListener('sharedContentLoaded', async () => {
                     valorTotal: totals.total,
                     valorFrete: totals.shippingCost,
                     enderecoId: selectedAddress.id,
-                    pagamentos: pagamentos
+                    pagamentos: pagamentos,
+                    cupons: appliedCouponsData.map(c => c.nome)
                 };
 
                 // Enviar transação para o backend
