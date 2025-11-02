@@ -42,15 +42,39 @@ document.addEventListener('sharedContentLoaded', async () => {
 
     // Função centralizada para mapear bandeiras de cartão
     function getBandeiraNome(bandeiraValue) {
-        const bandeiraMap = {
-            1: 'Visa',
-            2: 'Mastercard', // Exibindo como "Mastercard" mesmo que o enum seja "Mastercad"
-            3: 'American Express',
-            4: 'Elo',
-            5: 'HiperCard',
-            6: 'Aura'
-        };
-        return bandeiraMap[bandeiraValue] || 'Desconhecida';
+        // Se for null ou undefined, retornar Desconhecida
+        if (bandeiraValue === null || bandeiraValue === undefined) {
+            return 'Desconhecida';
+        }
+        
+        // Se for uma string (nome do enum do backend)
+        if (typeof bandeiraValue === 'string') {
+            const bandeiraStringMap = {
+                'Visa': 'Visa',
+                'Mastercad': 'Mastercard', // O backend retorna "Mastercad" mas exibimos "Mastercard"
+                'Mastercard': 'Mastercard',
+                'AmericanExpress': 'American Express',
+                'Elo': 'Elo',
+                'HiperCard': 'HiperCard',
+                'Aura': 'Aura'
+            };
+            return bandeiraStringMap[bandeiraValue] || bandeiraValue || 'Desconhecida';
+        }
+        
+        // Se for um número (valor do enum)
+        if (typeof bandeiraValue === 'number') {
+            const bandeiraMap = {
+                1: 'Visa',
+                2: 'Mastercard', // Exibindo como "Mastercard" mesmo que o enum seja "Mastercad"
+                3: 'American Express',
+                4: 'Elo',
+                5: 'HiperCard',
+                6: 'Aura'
+            };
+            return bandeiraMap[bandeiraValue] || 'Desconhecida';
+        }
+        
+        return 'Desconhecida';
     }
 
     async function fetchAddresses(clientId) {
@@ -183,7 +207,9 @@ document.addEventListener('sharedContentLoaded', async () => {
                 const cardDiv = document.createElement('div');
                 cardDiv.classList.add('list-group-item', 'd-flex', 'align-items-center');
 
-                const bandeiraNome = getBandeiraNome(card.bandeira);
+                // Priorizar bandeiraNome se disponível, senão usar bandeira
+                const bandeiraValue = card.bandeiraNome || card.bandeira;
+                const bandeiraNome = getBandeiraNome(bandeiraValue);
 
                 const isSelected = selectedCards.some(selected => selected.id === card.id);
                 
@@ -253,7 +279,9 @@ document.addEventListener('sharedContentLoaded', async () => {
             container.innerHTML = '';
             
             selectedCards.forEach((card, index) => {
-                const bandeiraNome = getBandeiraNome(card.bandeira);
+                // Priorizar bandeiraNome se disponível, senão usar bandeira
+                const bandeiraValue = card.bandeiraNome || card.bandeira;
+                const bandeiraNome = getBandeiraNome(bandeiraValue);
                 
                 // Preservar valor existente se disponível
                 const preservedValue = existingValues[card.id] || '';

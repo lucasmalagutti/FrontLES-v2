@@ -9,25 +9,26 @@ function waitForBootstrap(callback) {
 }
 
 // ENUMs de Status de Pedido (baseado no StatusPedido.cs do backend)
-// O backend usa: EmProcessamento, EmTransporte, Entregue, EmTroca, Trocado
+// O backend usa: EmProcessamento, EmTransporte, Entregue, EmTroca, Trocado, AguardandoConfirmacao
 // Mapeamento entre enum do backend e valores exibidos no frontend
 const STATUS_PEDIDO_BACKEND = {
     EmProcessamento: 1,
     EmTransporte: 2,
     Entregue: 3,
     EmTroca: 4,
-    Trocado: 5
+    Trocado: 5,
+    AguardandoConfirmacao: 6
 };
 
 // ENUMs de Status de Pedido para exibição no frontend
+// Condizente com o enum StatusPedido.cs do backend (6 valores)
 const STATUS_PEDIDO = {
-    EM_PROCESSAMENTO: 'EM PROCESSAMENTO',
-    EM_TRANSITO: 'EM TRANSITO',
-    ENTREGUE: 'ENTREGUE',
-    EM_TROCA: 'EM TROCA',
-    TROCA_AUTORIZADA: 'TROCA AUTORIZADA',
-    ITENS_RECEBIDOS: 'ITENS RECEBIDOS',
-    CANCELADO: 'CANCELADO'
+    EM_PROCESSAMENTO: 'EM PROCESSAMENTO',           // Mapeia para EmProcessamento = 1
+    EM_TRANSITO: 'EM TRANSITO',                     // Mapeia para EmTransporte = 2
+    ENTREGUE: 'ENTREGUE',                           // Mapeia para Entregue = 3
+    EM_TROCA: 'EM TROCA',                           // Mapeia para EmTroca = 4
+    TROCA_AUTORIZADA: 'TROCA AUTORIZADA',           // Mapeia para Trocado = 5
+    AGUARDANDO_CONFIRMACAO: 'AGUARDANDO CONFIRMAÇÃO' // Mapeia para AguardandoConfirmacao = 6
 };
 
 // Função para converter enum do backend para string do frontend
@@ -40,6 +41,7 @@ function converterStatusBackendParaFrontend(statusBackend) {
             case STATUS_PEDIDO_BACKEND.Entregue: return STATUS_PEDIDO.ENTREGUE;
             case STATUS_PEDIDO_BACKEND.EmTroca: return STATUS_PEDIDO.EM_TROCA;
             case STATUS_PEDIDO_BACKEND.Trocado: return STATUS_PEDIDO.TROCA_AUTORIZADA;
+            case STATUS_PEDIDO_BACKEND.AguardandoConfirmacao: return STATUS_PEDIDO.AGUARDANDO_CONFIRMACAO;
             default: return STATUS_PEDIDO.EM_PROCESSAMENTO;
         }
     }
@@ -52,6 +54,7 @@ function converterStatusBackendParaFrontend(statusBackend) {
         if (statusLower.includes('entregue')) return STATUS_PEDIDO.ENTREGUE;
         if (statusLower.includes('troca') && !statusLower.includes('autorizada')) return STATUS_PEDIDO.EM_TROCA;
         if (statusLower.includes('trocado') || statusLower.includes('autorizada')) return STATUS_PEDIDO.TROCA_AUTORIZADA;
+        if (statusLower.includes('aguardando') || statusLower.includes('confirmacao') || statusLower.includes('confirmação')) return STATUS_PEDIDO.AGUARDANDO_CONFIRMACAO;
         
         // Se já estiver no formato correto, retornar como está
         if (Object.values(STATUS_PEDIDO).includes(statusBackend)) {
@@ -70,14 +73,62 @@ function converterStatusFrontendParaBackend(statusFrontend) {
         case STATUS_PEDIDO.ENTREGUE: return 'Entregue';
         case STATUS_PEDIDO.EM_TROCA: return 'EmTroca';
         case STATUS_PEDIDO.TROCA_AUTORIZADA: return 'Trocado';
+        case STATUS_PEDIDO.AGUARDANDO_CONFIRMACAO: return 'AguardandoConfirmacao';
         default: return 'EmProcessamento';
     }
 }
 
-// ENUMs de Status de Transação disponíveis (mantido para compatibilidade)
-const STATUS_TRANSACAO = STATUS_PEDIDO;
+// ENUMs de Status de Transação (baseado no StatusTransacao.cs do backend)
+// O backend usa: Aprovado = 1, Reprovado = 2, Pendente = 3
+const STATUS_TRANSACAO_BACKEND = {
+    Aprovado: 1,
+    Reprovado: 2,
+    Pendente: 3
+};
 
-// Mapeamento de Status de Pagamento (número para nome por extenso)
+// ENUMs de Status de Transação para exibição no frontend
+const STATUS_TRANSACAO = {
+    APROVADO: 'APROVADO',
+    REPROVADO: 'REPROVADO',
+    PENDENTE: 'PENDENTE'
+};
+
+// Função para converter enum do backend para string do frontend
+function converterStatusTransacaoBackendParaFrontend(statusBackend) {
+    if (typeof statusBackend === 'number') {
+        switch (statusBackend) {
+            case STATUS_TRANSACAO_BACKEND.Aprovado: return STATUS_TRANSACAO.APROVADO;
+            case STATUS_TRANSACAO_BACKEND.Reprovado: return STATUS_TRANSACAO.REPROVADO;
+            case STATUS_TRANSACAO_BACKEND.Pendente: return STATUS_TRANSACAO.PENDENTE;
+            default: return STATUS_TRANSACAO.PENDENTE;
+        }
+    }
+    
+    if (typeof statusBackend === 'string') {
+        const statusLower = statusBackend.toLowerCase();
+        if (statusLower.includes('aprovado')) return STATUS_TRANSACAO.APROVADO;
+        if (statusLower.includes('reprovado')) return STATUS_TRANSACAO.REPROVADO;
+        if (statusLower.includes('pendente')) return STATUS_TRANSACAO.PENDENTE;
+        
+        if (Object.values(STATUS_TRANSACAO).includes(statusBackend)) {
+            return statusBackend;
+        }
+    }
+    
+    return STATUS_TRANSACAO.PENDENTE;
+}
+
+// Função para converter string do frontend para enum do backend
+function converterStatusTransacaoFrontendParaBackend(statusFrontend) {
+    switch (statusFrontend) {
+        case STATUS_TRANSACAO.APROVADO: return 'Aprovado';
+        case STATUS_TRANSACAO.REPROVADO: return 'Reprovado';
+        case STATUS_TRANSACAO.PENDENTE: return 'Pendente';
+        default: return 'Pendente';
+    }
+}
+
+// Mapeamento de Status de Pagamento (número para nome por extenso) - mantido para compatibilidade
 const STATUS_PAGAMENTO = {
     0: 'Pendente',
     1: 'Pendente',
@@ -379,22 +430,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusAtual = pedido.statusPedidoFrontend || converterStatusBackendParaFrontend(statusBackend);
             const transacaoId = pedido.id || pedido.transacaoId || null;
             
-            // Obter status de pagamento
-            const statusPagamentoNum = pedido.statusPagamento !== undefined ? pedido.statusPagamento :
-                                      (pedido.pagamento && pedido.pagamento.statusPagamento !== undefined) ? pedido.pagamento.statusPagamento :
-                                      (pedido.transacao && pedido.transacao.statusPagamento !== undefined) ? pedido.transacao.statusPagamento :
-                                      null;
-            const statusPagamentoTexto = obterNomeStatusPagamento(statusPagamentoNum);
-
-            // Determinar cor do badge baseado no status de pagamento
-            let badgeClassPagamento = 'bg-secondary';
-            if (statusPagamentoNum === 0 || statusPagamentoNum === 1) badgeClassPagamento = 'bg-warning';
-            else if (statusPagamentoNum === 2) badgeClassPagamento = 'bg-success';
-            else if (statusPagamentoNum === 3) badgeClassPagamento = 'bg-danger';
-            else if (statusPagamentoNum === 4) badgeClassPagamento = 'bg-dark';
-            else if (statusPagamentoNum === 5) badgeClassPagamento = 'bg-info';
-            else if (statusPagamentoNum === 6) badgeClassPagamento = 'bg-primary';
-            else if (statusPagamentoNum === 7) badgeClassPagamento = 'bg-info';
+            // Obter status da transação (StatusTransacao)
+            const statusTransacaoBackend = pedido.statusTransacao !== undefined ? pedido.statusTransacao :
+                                          (pedido.transacao && pedido.transacao.statusTransacao !== undefined) ? pedido.transacao.statusTransacao :
+                                          null;
+            const statusTransacaoAtual = pedido.statusTransacaoFrontend || converterStatusTransacaoBackendParaFrontend(statusTransacaoBackend);
+            
+            // Criar select para StatusTransacao
+            const statusTransacaoDisponiveis = Object.values(STATUS_TRANSACAO);
+            let statusTransacaoSelectOptions = '';
+            statusTransacaoDisponiveis.forEach(status => {
+                const selected = statusTransacaoAtual === status ? 'selected' : '';
+                statusTransacaoSelectOptions += `<option value="${status}" ${selected}>${status}</option>`;
+            });
+            
+            const statusTransacaoSelect = `
+                <select class="form-select form-select-sm" onchange="alterarStatusTransacao(${transacaoId}, this.value)" ${!transacaoId ? 'disabled' : ''}>
+                    ${statusTransacaoSelectOptions}
+                </select>
+            `;
 
             // Determinar cor do badge baseado no status da transação
             let badgeClass = 'bg-secondary';
@@ -403,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (statusAtual === STATUS_PEDIDO.EM_TRANSITO) badgeClass = 'bg-info';
             else if (statusAtual === STATUS_PEDIDO.ENTREGUE) badgeClass = 'bg-success';
             else if (statusAtual === STATUS_PEDIDO.TROCA_AUTORIZADA) badgeClass = 'bg-primary';
-            else if (statusAtual === STATUS_PEDIDO.ITENS_RECEBIDOS) badgeClass = 'bg-success';
+            else if (statusAtual === STATUS_PEDIDO.AGUARDANDO_CONFIRMACAO) badgeClass = 'bg-warning';
 
             // Obter status disponíveis baseado no enum do backend
             const statusDisponiveisFrontend = [
@@ -411,7 +465,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 STATUS_PEDIDO.EM_TRANSITO,
                 STATUS_PEDIDO.ENTREGUE,
                 STATUS_PEDIDO.EM_TROCA,
-                STATUS_PEDIDO.TROCA_AUTORIZADA
+                STATUS_PEDIDO.TROCA_AUTORIZADA,
+                STATUS_PEDIDO.AGUARDANDO_CONFIRMACAO
             ];
             
             // Se o pedido tiver statusDisponiveis específicos, usar esses, senão usar todos do enum
@@ -439,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${clienteNome}</td>
                 <td>${dataFormatada}</td>
                 <td>R$ ${valorTotal.toFixed(2)}</td>
-                <td><span class="badge ${badgeClassPagamento}">${statusPagamentoTexto}</span></td>
+                <td>${statusTransacaoSelect}</td>
                 <td>${statusSelect}</td>
                 <td>
                     <button class="btn btn-sm btn-info" onclick="verDetalhesPedido(${transacaoId || pedidoId})">
@@ -490,23 +545,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusAtual = converterStatusBackendParaFrontend(statusBackend);
             const transacaoId = pedido.id || pedido.transacaoId || null;
             
-            // Obter status de pagamento e converter para nome por extenso
-            // Buscar em diferentes propriedades possíveis
-            const statusPagamentoNum = pedido.statusPagamento !== undefined ? pedido.statusPagamento :
-                                      (pedido.pagamento && pedido.pagamento.statusPagamento !== undefined) ? pedido.pagamento.statusPagamento :
-                                      (pedido.transacao && pedido.transacao.statusPagamento !== undefined) ? pedido.transacao.statusPagamento :
-                                      null;
-            const statusPagamentoTexto = obterNomeStatusPagamento(statusPagamentoNum);
-
-            // Determinar cor do badge baseado no status de pagamento
-            let badgeClassPagamento = 'bg-secondary';
-            if (statusPagamentoNum === 0 || statusPagamentoNum === 1) badgeClassPagamento = 'bg-warning'; // Pendente
-            else if (statusPagamentoNum === 2) badgeClassPagamento = 'bg-success'; // Aprovado
-            else if (statusPagamentoNum === 3) badgeClassPagamento = 'bg-danger'; // Recusado
-            else if (statusPagamentoNum === 4) badgeClassPagamento = 'bg-dark'; // Cancelado
-            else if (statusPagamentoNum === 5) badgeClassPagamento = 'bg-info'; // Reembolsado
-            else if (statusPagamentoNum === 6) badgeClassPagamento = 'bg-primary'; // Em Análise
-            else if (statusPagamentoNum === 7) badgeClassPagamento = 'bg-info'; // Processando
+            // Obter status da transação (StatusTransacao)
+            const statusTransacaoBackend = pedido.statusTransacao !== undefined ? pedido.statusTransacao :
+                                          (pedido.transacao && pedido.transacao.statusTransacao !== undefined) ? pedido.transacao.statusTransacao :
+                                          null;
+            const statusTransacaoAtual = pedido.statusTransacaoFrontend || converterStatusTransacaoBackendParaFrontend(statusTransacaoBackend);
+            
+            // Criar select para StatusTransacao
+            const statusTransacaoDisponiveis = Object.values(STATUS_TRANSACAO);
+            let statusTransacaoSelectOptions = '';
+            statusTransacaoDisponiveis.forEach(status => {
+                const selected = statusTransacaoAtual === status ? 'selected' : '';
+                statusTransacaoSelectOptions += `<option value="${status}" ${selected}>${status}</option>`;
+            });
+            
+            const statusTransacaoSelect = `
+                <select class="form-select form-select-sm" onchange="alterarStatusTransacao(${transacaoId}, this.value)" ${!transacaoId ? 'disabled' : ''}>
+                    ${statusTransacaoSelectOptions}
+                </select>
+            `;
 
             // Determinar cor do badge baseado no status da transação (para a coluna de alterar status)
             let badgeClass = 'bg-secondary';
@@ -515,20 +572,21 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (statusAtual === STATUS_PEDIDO.EM_TRANSITO) badgeClass = 'bg-info';
             else if (statusAtual === STATUS_PEDIDO.ENTREGUE) badgeClass = 'bg-success';
             else if (statusAtual === STATUS_PEDIDO.TROCA_AUTORIZADA) badgeClass = 'bg-primary';
-            else if (statusAtual === STATUS_PEDIDO.ITENS_RECEBIDOS) badgeClass = 'bg-success';
+            else if (statusAtual === STATUS_PEDIDO.AGUARDANDO_CONFIRMACAO) badgeClass = 'bg-warning';
 
             // Formatar data
             const dataFormatada = formatDate(dataTransacao);
 
             // Obter status disponíveis baseado no enum do backend
-            // O backend tem: EmProcessamento, EmTransporte, Entregue, EmTroca, Trocado
+            // O backend tem: EmProcessamento, EmTransporte, Entregue, EmTroca, Trocado, AguardandoConfirmacao
             // Mapear para os valores do frontend correspondentes
             const statusDisponiveisFrontend = [
                 STATUS_PEDIDO.EM_PROCESSAMENTO,
                 STATUS_PEDIDO.EM_TRANSITO,
                 STATUS_PEDIDO.ENTREGUE,
                 STATUS_PEDIDO.EM_TROCA,
-                STATUS_PEDIDO.TROCA_AUTORIZADA
+                STATUS_PEDIDO.TROCA_AUTORIZADA,
+                STATUS_PEDIDO.AGUARDANDO_CONFIRMACAO
             ];
             
             // Se o pedido tiver statusDisponiveis específicos, usar esses, senão usar todos do enum
@@ -554,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${clienteNome}</td>
                 <td>${dataFormatada}</td>
                 <td>R$ ${valorTotal.toFixed(2)}</td>
-                <td><span class="badge ${badgeClassPagamento}">${statusPagamentoTexto}</span></td>
+                <td>${statusTransacaoSelect}</td>
                 <td>${statusSelect}</td>
                 <td>
                     <button class="btn btn-sm btn-info" onclick="verDetalhesPedido(${transacaoId || pedidoId})">
@@ -614,6 +672,81 @@ document.addEventListener('DOMContentLoaded', () => {
             return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         } catch (e) {
             return dateStr;
+        }
+    }
+
+    // Alterar status da transação (StatusTransacao)
+    window.alterarStatusTransacao = async function(transacaoId, novoStatus) {
+        if (!transacaoId) {
+            showAlert('ID da transação não encontrado.', 'warning');
+            return;
+        }
+
+        try {
+            await atualizarStatusTransacaoAPI(transacaoId, novoStatus);
+        } catch (error) {
+            console.error('Erro ao alterar status da transação:', error);
+            showAlert(`Erro ao alterar status da transação: ${error.message}`, 'danger');
+        }
+    };
+
+    // Atualizar status da transação via API
+    async function atualizarStatusTransacaoAPI(transacaoId, novoStatus) {
+        try {
+            // Converter status do frontend para o formato do backend
+            const statusBackend = converterStatusTransacaoFrontendParaBackend(novoStatus);
+            
+            const response = await fetch(`${API_BASE_URL}/Transacao/AtualizarStatusTransacao/${transacaoId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    statusTransacao: statusBackend
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erro ao atualizar status da transação: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            
+            // Atualizar o pedido local automaticamente
+            const pedidoIndex = pedidos.findIndex(p => {
+                const id = p.id || p.transacaoId;
+                return id == transacaoId || id === transacaoId;
+            });
+
+            if (pedidoIndex !== -1) {
+                // Atualizar status no objeto local
+                pedidos[pedidoIndex].statusTransacao = statusBackend;
+                pedidos[pedidoIndex].statusTransacaoFrontend = novoStatus;
+                if (pedidos[pedidoIndex].transacao) {
+                    pedidos[pedidoIndex].transacao.statusTransacao = statusBackend;
+                }
+                
+                // Atualizar apenas a linha específica na tabela
+                const pedido = pedidos[pedidoIndex];
+                const pedidoId = pedido.pedidoId || (pedido.pedido ? pedido.pedido.id : null);
+                if (pedidoId) {
+                    atualizarLinhaTabelaPorId(pedidoId, pedido);
+                } else {
+                    renderizarPedidos();
+            }
+        } else {
+                // Se não encontrou, recarregar tudo
+                renderizarPedidos();
+            }
+
+            showSuccessNotification(`Status da transação atualizado para "${novoStatus}" com sucesso!`);
+            return true;
+
+        } catch (error) {
+            console.error('Erro ao atualizar status da transação:', error);
+            showAlert(`Erro ao atualizar status da transação: ${error.message}`, 'danger');
+            return false;
         }
     }
 
@@ -698,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await atualizarStatusPedidoAPI(pedidoId, STATUS_PEDIDO.TROCA_AUTORIZADA);
     };
 
-    // Confirmar chegada dos itens
+    // Confirmar chegada dos itens (ajustado para usar TROCA_AUTORIZADA que é o status final após receber itens)
     window.confirmarChegadaItens = async function(pedidoId) {
         const pedido = pedidos.find(p => {
             const id = p.pedidoId || (p.pedido ? p.pedido.id : null) || p.id || p.transacaoId;
@@ -710,7 +843,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        await atualizarStatusPedidoAPI(pedidoId, STATUS_PEDIDO.ITENS_RECEBIDOS);
+        // Trocado (TROCA_AUTORIZADA) é o status final após receber os itens da troca
+        await atualizarStatusPedidoAPI(pedidoId, STATUS_PEDIDO.TROCA_AUTORIZADA);
     };
 
     // Ver detalhes do pedido
