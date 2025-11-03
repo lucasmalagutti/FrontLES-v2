@@ -501,9 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         Ver Itens
                     </button>
                 </td>
-                <td>
-                    ${getBotoesAcao(pedido)}
-                </td>
+                
             `;
         }
     }
@@ -619,7 +617,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         Ver Itens
                     </button>
                 </td>
-                <td>${getBotoesAcao(pedido)}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -628,41 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ================================
     // 🔹 Função de botões de ação
     // ================================
-    function getBotoesAcao(pedido) {
-        const pedidoId = pedido.pedidoId || (pedido.pedido ? pedido.pedido.id : null) || pedido.id || pedido.transacaoId;
-        const statusAtual = pedido.statusPedido || pedido.statusTransacao || pedido.status || '';
-        let botoes = '';
-        
-        if (statusAtual === STATUS_PEDIDO.EM_PROCESSAMENTO) {
-            botoes = `
-                <button class="btn btn-sm btn-success me-1" onclick="aceitarPedido('${pedidoId}')">
-                    Aceitar Pedido
-                </button>
-            `;
-        } else if (statusAtual === STATUS_PEDIDO.EM_TRANSITO) {
-            botoes = `
-                <button class="btn btn-sm btn-success me-1" onclick="confirmarEntrega('${pedidoId}')">
-                    Confirmar Entrega
-                </button>
-            `;
-        } else if (statusAtual === STATUS_PEDIDO.EM_TROCA) {
-            botoes = `
-                <button class="btn btn-sm btn-success me-1" onclick="autorizarTroca('${pedidoId}')">
-                    Autorizar Troca
-                </button>
-            `;
-        } else if (statusAtual === STATUS_PEDIDO.TROCA_AUTORIZADA) {
-            botoes = `
-                <button class="btn btn-sm btn-info me-1" onclick="confirmarChegadaItens('${pedidoId}')">
-                    <i class="bi bi-box-seam"></i> Confirmar Chegada
-                </button>
-            `;
-        } else {
-            botoes = '<span class="text-muted">Nenhuma ação disponível</span>';
-        }
-        
-        return botoes;
-    }
+    
 
     // Função para formatar data
     function formatDate(dateStr) {
@@ -858,7 +821,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const pedidoCompleto = await response.json();
 
-        const modalBody = document.querySelector('#transacoesModal .modal-body');
         const modalTitle = document.getElementById('transacoesModalLabel');
             if (modalTitle) modalTitle.textContent = `Detalhes do Pedido #${pedidoId}`;
 
