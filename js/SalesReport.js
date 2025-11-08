@@ -1,95 +1,179 @@
 document.addEventListener('sharedContentLoaded', () => {
-    const salesData = [
-        { date: '2023-10-01', productId: '1', quantity: 5, total: 999.50 },
-        { date: '2023-10-02', productId: '5', quantity: 3, total: 389.70 },
-        { date: '2023-10-05', productId: '2', quantity: 10, total: 899.00 },
-        { date: '2023-10-15', productId: '1', quantity: 2, total: 399.80 },
-        { date: '2023-11-10', productId: '6', quantity: 1, total: 899.90 },
-        { date: '2023-11-12', productId: '3', quantity: 4, total: 719.60 },
-    ];
-
     const salesReportForm = document.getElementById('salesReportForm');
-    const categoryCheckboxesContainer = document.getElementById('categoryCheckboxes');
     const reportResult = document.getElementById('reportResult');
     const salesChartCanvas = document.getElementById('salesChart');
     let salesChart = null;
 
-    const categories = [...new Set(produtos.map(p => p.categoria))];
-    categories.forEach(category => {
-        const div = document.createElement('div');
-        div.classList.add('form-check');
-        div.innerHTML = `
-            <input class="form-check-input" type="checkbox" value="${category}" id="cat-${category}">
-            <label class="form-check-label" for="cat-${category}">
-                ${category}
-            </label>
-        `;
-        categoryCheckboxesContainer.appendChild(div);
-    });
-
-    salesReportForm.addEventListener('submit', (event) => {
+    salesReportForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const reportType = document.getElementById('reportType').value;
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
-        const selectedCategories = Array.from(document.querySelectorAll('#categoryCheckboxes input:checked')).map(cb => cb.value);
 
-        if (!startDate || !endDate || selectedCategories.length === 0) {
-            alert('Por favor, preencha o período e selecione ao menos uma categoria.');
+        if (!startDate || !endDate) {
+            alert('Por favor, preencha o período.');
             return;
         }
 
-        const filteredSales = salesData.filter(sale => {
-            const saleDate = new Date(sale.date);
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            const product = produtos.find(p => p.id === sale.productId);
-            return saleDate >= start && saleDate <= end && product && selectedCategories.includes(product.categoria);
-        });
-
-        const reportData = processReportData(filteredSales, selectedCategories);
-        renderChart(reportData);
-        reportResult.classList.remove('d-none');
+        try {
+            let data;
+            if (reportType === 'venda') {
+                data = await fetchVendasPorDia(startDate, endDate);
+                const chartData = processVendasPorDiaData(data);
+                renderChart(chartData);
+            } else {
+                data = await fetchVendasPorCategoria(startDate, endDate);
+                const chartData = processVendasPorCategoriaData(data);
+                renderChart(chartData);
+            }
+            reportResult.classList.remove('d-none');
+        } catch (error) {
+            console.error('Erro ao buscar dados:', error);
+            alert('Erro ao gerar relatório. Por favor, tente novamente.');
+        }
     });
 
-    function processReportData(filteredSales, selectedCategories) {
-        const data = {
-            labels: selectedCategories,
-            datasets: [{
-                label: 'Total de Vendas (R$)',
-                data: [],
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        };
+    async function fetchVendasPorDia(startDate, endDate) {
+        const url = `https://localhost:7280/Transacao/GraficoPorVenda?dataInicio=${startDate}&dataFim=${endDate}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.status}`);
+        }
+        return await response.json();
+    }
 
-        selectedCategories.forEach(category => {
-            const categorySales = filteredSales.filter(sale => {
-                const product = produtos.find(p => p.id === sale.productId);
-                return product && product.categoria === category;
-            });
-            const total = categorySales.reduce((sum, sale) => sum + sale.total, 0);
-            data.datasets[0].data.push(total);
+    async function fetchVendasPorCategoria(startDate, endDate) {
+        const url = `https://localhost:7280/Transacao/GraficoPorVendaCategoria?dataInicio=${startDate}&dataFim=${endDate}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.status}`);
+        }
+        return await response.json();
+    }
+
+    function processVendasPorDiaData(data) {
+        // Ordena por data
+        const sortedData = data.sort((a, b) => new Date(a.data) - new Date(b.data));
+        
+        const labels = sortedData.map(item => {
+            const date = new Date(item.data);
+            return date.toLocaleDateString('pt-BR');
         });
 
-        return data;
+        return {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Total de Vendas (R$)',
+                    data: sortedData.map(item => item.valorTotal),
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Quantidade de Transações',
+                    data: sortedData.map(item => item.quantidadeVendas),
+                    fill: false,
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1,
+                    yAxisID: 'y1'
+                }
+            ]
+        };
+    }
+
+    function processVendasPorCategoriaData(data) {
+        // Agrupa por categoria e ordena por data
+        const categories = [...new Set(data.map(item => item.categoriaNome))];
+        
+        // Normaliza as datas para comparação (remove a parte de hora se houver)
+        const normalizeDate = (dateStr) => {
+            return new Date(dateStr).toISOString().split('T')[0];
+        };
+        
+        const dates = [...new Set(data.map(item => normalizeDate(item.data)))].sort((a, b) => new Date(a) - new Date(b));
+        
+        const labels = dates.map(date => {
+            const d = new Date(date);
+            return d.toLocaleDateString('pt-BR');
+        });
+
+        const datasets = categories.map((category, index) => {
+            const colors = [
+                'rgb(75, 192, 192)',
+                'rgb(255, 99, 132)',
+                'rgb(255, 205, 86)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+            ];
+            
+            const categoryData = dates.map(date => {
+                const item = data.find(d => {
+                    const itemDate = normalizeDate(d.data);
+                    return itemDate === date && d.categoriaNome === category;
+                });
+                return item ? item.valorTotal : 0;
+            });
+
+            return {
+                label: category,
+                data: categoryData,
+                fill: false,
+                borderColor: colors[index % colors.length],
+                tension: 0.1
+            };
+        });
+
+        return {
+            labels: labels,
+            datasets: datasets
+        };
     }
 
     function renderChart(data) {
         if (salesChart) {
             salesChart.destroy();
         }
-        salesChart = new Chart(salesChartCanvas, {
-            type: 'line',
-            data: data,
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+
+        const options = {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Valor Total (R$)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Quantidade de Transações'
+                    },
+                    grid: {
+                        drawOnChartArea: false
                     }
                 }
             }
+        };
+
+        // Se for relatório por categoria, remove o eixo y1
+        if (data.datasets.length > 0 && !data.datasets[0].yAxisID) {
+            delete options.scales.y1;
+        }
+
+        salesChart = new Chart(salesChartCanvas, {
+            type: 'line',
+            data: data,
+            options: options
         });
     }
 });

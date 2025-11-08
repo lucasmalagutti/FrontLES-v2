@@ -16,17 +16,19 @@
 
             <form id="salesReportForm" class="row g-3 mb-4">
                 <div class="col-md-4">
+                    <label for="reportType" class="form-label">Tipo de Relatório</label>
+                    <select class="form-select" id="reportType" required>
+                        <option value="venda">Por Venda (Agrupa por Dia)</option>
+                        <option value="categoria">Por Categoria (Agrupa por Dia e Categoria)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label for="startDate" class="form-label">Data de Início</label>
                     <input type="date" class="form-control" id="startDate" required>
                 </div>
                 <div class="col-md-4">
                     <label for="endDate" class="form-label">Data de Fim</label>
                     <input type="date" class="form-control" id="endDate" required>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Esportes</label>
-                    <div id="categoryCheckboxes">
-                        </div>
                 </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">Gerar Relatório</button>
@@ -45,7 +47,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/productData.js"></script>
     <script src="js/loadShared.js"></script>
-    <script src="js/salesReport.js"></script>
+    <script src="js/SalesReport.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
