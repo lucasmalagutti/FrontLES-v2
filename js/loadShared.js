@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadComponent('shared.html', '#cartOffcanvas'),
         loadComponent('modals/_loginModel.html', '#loginModal'),
         loadComponent('modals/_chatModal.html', '#chatModal'),
-        loadComponent('modals/_chatModal.html', '.chat-btn'), // Botão do chat
+        loadComponent('modals/_chatModal.html', '.chat-btn'), 
         loadComponent('modals/pagAdm/_addEnderecoModal.html', '#addEnderecoModal'),
         loadComponent('modals/pagAdm/_addCartaoModal.html', '#addCartaoModal'),
         loadComponent('modals/pagAdm/_editarDadosModal.html', '#editarDadosModal'),
