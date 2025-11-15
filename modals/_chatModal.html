@@ -12,14 +12,19 @@
         </div>
         <div class="modal-body d-flex flex-column">
           <!-- Área do chat -->
-          <div class="chat-box flex-grow-1 mb-2">
-            <div><strong>Atendente:</strong> Olá, em que posso ajudar?</div>
+          <div class="chat-box flex-grow-1 mb-2" id="chatbotMessages">
+            <div class="chat-message chat-message-bot">
+              <strong>Atendente:</strong>
+              <span>Olá, em que posso ajudar?</span>
+            </div>
           </div>
+
+          <div class="chat-typing text-muted small" id="chatbotTyping" hidden>Estou procurando sugestões para você...</div>
 
           <!-- Input para digitar mensagem -->
           <div class="chat-input d-flex">
-            <input type="text" class="form-control me-2" placeholder="Digite sua mensagem...">
-            <button class="btn btn-primary">Enviar</button>
+            <input type="text" class="form-control me-2" placeholder="Digite sua mensagem..." id="chatbotInput" autocomplete="off">
+            <button type="button" class="btn btn-primary" id="chatbotSendButton">Enviar</button>
           </div>
         </div>
       </div>

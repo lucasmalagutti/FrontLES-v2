@@ -1,4 +1,5 @@
 // loadShared.js
+import { initializeChatbot } from './chatbot.js';
 document.addEventListener('DOMContentLoaded', () => {
     const loadHtml = (url, selector, targetElement) => {
         return fetch(url)
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Promise.all(fetches)
         .then(() => {
             document.dispatchEvent(new Event('sharedContentLoaded'));
+            initializeChatbot();
         })
         .catch(error => console.error('Erro ao carregar componentes compartilhados:', error));
 });
