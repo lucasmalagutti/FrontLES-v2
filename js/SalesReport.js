@@ -3,6 +3,19 @@ document.addEventListener('sharedContentLoaded', () => {
     const reportResult = document.getElementById('reportResult');
     const salesChartCanvas = document.getElementById('salesChart');
     let salesChart = null;
+    const chartColors = [
+        'rgb(75, 192, 192)',
+        'rgb(255, 99, 132)',
+        'rgb(255, 205, 86)',
+        'rgb(54, 162, 235)',
+        'rgb(153, 102, 255)',
+        'rgb(201, 203, 207)'
+    ];
+    const getIsoDatePart = (dateStr) => dateStr.split('T')[0];
+    const formatIsoDateToPtBr = (isoDate) => {
+        const [year, month, day] = isoDate.split('-');
+        return `${day}/${month}/${year}`;
+    };
 
     salesReportForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -18,15 +31,34 @@ document.addEventListener('sharedContentLoaded', () => {
 
         try {
             let data;
+            let chartData;
+            let chartConfig = {};
+
             if (reportType === 'venda') {
                 data = await fetchVendasPorDia(startDate, endDate);
-                const chartData = processVendasPorDiaData(data);
-                renderChart(chartData);
-            } else {
+                chartData = processVendasPorDiaData(data);
+                chartConfig = {
+                    yAxisTitle: 'Valor Total (R$)',
+                    secondaryAxisTitle: 'Quantidade de Transações',
+                    includeSecondaryAxis: true
+                };
+            } else if (reportType === 'categoria') {
                 data = await fetchVendasPorCategoria(startDate, endDate);
-                const chartData = processVendasPorCategoriaData(data);
-                renderChart(chartData);
+                chartData = processVendasPorCategoriaData(data);
+                chartConfig = {
+                    yAxisTitle: 'Valor Total (R$)',
+                    includeSecondaryAxis: false
+                };
+            } else {
+                data = await fetchVendasPorProduto(startDate, endDate);
+                chartData = processVendasPorProdutoData(data);
+                chartConfig = {
+                    yAxisTitle: 'Quantidade Vendida',
+                    includeSecondaryAxis: false
+                };
             }
+
+            renderChart(chartData, chartConfig);
             reportResult.classList.remove('d-none');
         } catch (error) {
             console.error('Erro ao buscar dados:', error);
@@ -52,13 +84,25 @@ document.addEventListener('sharedContentLoaded', () => {
         return await response.json();
     }
 
+    async function fetchVendasPorProduto(startDate, endDate) {
+        const url = `https://localhost:7280/Transacao/GraficoPorVendaProduto?dataInicio=${startDate}&dataFim=${endDate}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.status}`);
+        }
+        return await response.json();
+    }
+
     function processVendasPorDiaData(data) {
-        // Ordena por data
-        const sortedData = data.sort((a, b) => new Date(a.data) - new Date(b.data));
-        
+        const sortedData = [...data].sort((a, b) => {
+            const dateA = getIsoDatePart(a.data);
+            const dateB = getIsoDatePart(b.data);
+            return dateA.localeCompare(dateB);
+        });
+
         const labels = sortedData.map(item => {
-            const date = new Date(item.data);
-            return date.toLocaleDateString('pt-BR');
+            const isoDate = getIsoDatePart(item.data);
+            return formatIsoDateToPtBr(isoDate);
         });
 
         return {
@@ -85,31 +129,14 @@ document.addEventListener('sharedContentLoaded', () => {
     }
 
     function processVendasPorCategoriaData(data) {
-        // Agrupa por categoria e ordena por data
         const categories = [...new Set(data.map(item => item.categoriaNome))];
-        
-        // Normaliza as datas para comparação (remove a parte de hora se houver)
-        const normalizeDate = (dateStr) => {
-            return new Date(dateStr).toISOString().split('T')[0];
-        };
-        
-        const dates = [...new Set(data.map(item => normalizeDate(item.data)))].sort((a, b) => new Date(a) - new Date(b));
-        
-        const labels = dates.map(date => {
-            const d = new Date(date);
-            return d.toLocaleDateString('pt-BR');
-        });
+        const normalizeDate = (dateStr) => getIsoDatePart(dateStr);
+
+        const dates = [...new Set(data.map(item => normalizeDate(item.data)))].sort((a, b) => a.localeCompare(b));
+
+        const labels = dates.map(date => formatIsoDateToPtBr(date));
 
         const datasets = categories.map((category, index) => {
-            const colors = [
-                'rgb(75, 192, 192)',
-                'rgb(255, 99, 132)',
-                'rgb(255, 205, 86)',
-                'rgb(54, 162, 235)',
-                'rgb(153, 102, 255)',
-                'rgb(201, 203, 207)'
-            ];
-            
             const categoryData = dates.map(date => {
                 const item = data.find(d => {
                     const itemDate = normalizeDate(d.data);
@@ -122,7 +149,7 @@ document.addEventListener('sharedContentLoaded', () => {
                 label: category,
                 data: categoryData,
                 fill: false,
-                borderColor: colors[index % colors.length],
+                borderColor: chartColors[index % chartColors.length],
                 tension: 0.1
             };
         });
@@ -133,12 +160,51 @@ document.addEventListener('sharedContentLoaded', () => {
         };
     }
 
-    function renderChart(data) {
+    function processVendasPorProdutoData(data) {
+        const normalizeDate = (dateStr) => getIsoDatePart(dateStr);
+
+        const products = [...new Set(data.map(item => item.produtoNome))];
+        const dates = [...new Set(data.map(item => normalizeDate(item.data)))].sort((a, b) => a.localeCompare(b));
+
+        const labels = dates.map(date => formatIsoDateToPtBr(date));
+
+        const datasets = products.map((product, index) => {
+            const productData = dates.map(date => {
+                const item = data.find(d => {
+                    const itemDate = normalizeDate(d.data);
+                    return itemDate === date && d.produtoNome === product;
+                });
+                return item ? item.quantidade : 0;
+            });
+
+            return {
+                label: product,
+                data: productData,
+                fill: false,
+                borderColor: chartColors[index % chartColors.length],
+                tension: 0.1
+            };
+        });
+
+        return {
+            labels: labels,
+            datasets: datasets
+        };
+    }
+
+    function renderChart(data, config = {}) {
         if (salesChart) {
             salesChart.destroy();
         }
 
+        const {
+            yAxisTitle = 'Valor Total (R$)',
+            secondaryAxisTitle = 'Quantidade de Transações',
+            includeSecondaryAxis
+        } = config;
+
         const options = {
+            responsive: true,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -147,27 +213,27 @@ document.addEventListener('sharedContentLoaded', () => {
                     position: 'left',
                     title: {
                         display: true,
-                        text: 'Valor Total (R$)'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Quantidade de Transações'
-                    },
-                    grid: {
-                        drawOnChartArea: false
+                        text: yAxisTitle
                     }
                 }
             }
         };
 
-        // Se for relatório por categoria, remove o eixo y1
-        if (data.datasets.length > 0 && !data.datasets[0].yAxisID) {
-            delete options.scales.y1;
+        const shouldIncludeSecondaryAxis = includeSecondaryAxis ?? data.datasets.some(dataset => dataset.yAxisID === 'y1');
+
+        if (shouldIncludeSecondaryAxis) {
+            options.scales.y1 = {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: secondaryAxisTitle
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            };
         }
 
         salesChart = new Chart(salesChartCanvas, {

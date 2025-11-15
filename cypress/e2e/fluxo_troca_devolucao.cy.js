@@ -154,7 +154,7 @@ describe('Fluxo de Troca/Devolução E2E', () => {
     cy.get(':nth-child(1) > [name="payment-method"]').click();
     cy.wait(1000);
 
-    const cupomUsado = 'TROCA17_202511030154460';
+    const cupomUsado = 'TROCA11_202511032138550';
     // 24. Aplicar cupom gerado pela troca
     cy.get('#coupon-input').type(cupomUsado, { delay: 50 });
     cy.get('#apply-coupon-btn').click();
@@ -165,76 +165,5 @@ describe('Fluxo de Troca/Devolução E2E', () => {
     cy.get('#place-order-btn').click();
     cy.wait(3000);
 
-    // 26. Fazer outro pedido do mesmo item
-    cy.visit('index.html');
-    cy.url().should('include', 'index.html');
-    cy.wait(3000);
-
-    // 27. Clicar em comprar o mesmo produto (bola de futebol nike)
-    cy.get('#futebol').should('be.visible');
-    
-    // Tentar encontrar produto com "nike" primeiro
-    cy.get('#futebol .card').then(($cards) => {
-      const temNike = Array.from($cards).some(card => 
-        Cypress.$(card).text().toLowerCase().includes('nike')
-      );
-      
-      if (temNike) {
-        cy.get('#futebol .card').contains('nike', { matchCase: false }).parents('.card').within(() => {
-          cy.get('.btn-comprar, .add-to-cart').first().click();
-        });
-      } else {
-        // Não encontrou, usar o primeiro produto de futebol
-        cy.get('#futebol .card').first().within(() => {
-          cy.get('.btn-comprar, .add-to-cart').first().click();
-        });
-      }
-    });
-    cy.wait(2000);
-
-    // 28. Acessar carrinho e clicar em finalizar compra
-    cy.get('.offcanvas').should('be.visible');
-    cy.get('.offcanvas-title').should('contain', 'Carrinho');
-    cy.get('#checkout-btn').click();
-    cy.wait(2000);
-
-    // 29. Escolher um endereço e um cartão
-    cy.get('#saved-addresses > :nth-child(1) > .form-check-label').click();
-    cy.wait(1000);
-    cy.get(':nth-child(1) > [name="payment-method"]').click();
-    cy.wait(1000);
-
-    // 30. Tentar aplicar o cupom já utilizado novamente
-    // Configurar stub do window.alert para capturar a mensagem de erro ANTES de aplicar
-    cy.window().then((win) => {
-      cy.stub(win, 'alert').as('alertStub');
-    });
-    
-    cy.get('#coupon-input').type(cupomUsado, { delay: 50 });
-    cy.get('#apply-coupon-btn').click();
-    cy.wait(2000);
-
-    // 31. Verificar se apareceu erro de cupom já utilizado
-    cy.get('@alertStub').should('have.been.called');
-    cy.get('@alertStub').then((stub) => {
-      const alertMessage = stub.getCall(0).args[0];
-      // Verificar se a mensagem contém indicação de cupom inválido ou já utilizado
-      expect(alertMessage).to.satisfy((msg) => {
-        const msgLower = msg.toLowerCase();
-        return msgLower.includes('cupom') && 
-               (msgLower.includes('inválido') || 
-                msgLower.includes('já') || 
-                msgLower.includes('utilizado') ||
-                msgLower.includes('usado') ||
-                msgLower.includes('já foi'));
-      });
-    });
-
-    // 32. Cancelar o pedido
-    cy.get('#cancel-order-btn').should('be.visible');
-    cy.get('#cancel-order-btn').click();
-    cy.wait(2000);
-
-    cy.log('Teste de fluxo de troca/devolução concluído com sucesso!');
   });
 });

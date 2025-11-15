@@ -177,11 +177,59 @@ body {
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .chat-input {
     border-top: 1px solid #dee2e6;
     padding: 15px 0 0 0;
+}
+
+.chat-message {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 90%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.chat-message strong {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.chat-message-bot {
+    align-self: flex-start;
+    background-color: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    align-items: flex-start;
+}
+
+.chat-message-user {
+    align-self: flex-end;
+    background-color: #0d6efd;
+    color: #ffffff;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.chat-message-user strong {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.chat-typing {
+    margin-bottom: 10px;
+}
+
+.chat-suggestion-list {
+    padding-left: 20px;
+    margin-bottom: 0;
 }
 
 /* Estilo personalizado para botões de compra */
