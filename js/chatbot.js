@@ -3,6 +3,7 @@ const MAX_SUGGESTIONS = 5;
 
 let isInitialized = false;
 let isSendingMessage = false;
+let ultimaRecomendacaoProdutos = []; // Para rastrear feedback negativo
 
 const formatCurrency = (value) => {
     if (value === null || value === undefined) {
@@ -99,12 +100,20 @@ export function initializeChatbot() {
         appendMessageElement(wrapper);
     };
 
-    const appendBotSuggestions = (produtos) => {
+    const appendBotSuggestions = (produtos, mensagem = '') => {
         const wrapper = createMessageWrapper(false);
 
-        const intro = document.createElement('span');
-        intro.textContent = 'Encontrei algumas opções para você:';
-        wrapper.appendChild(intro);
+        if (mensagem) {
+            const intro = document.createElement('div');
+            intro.classList.add('mb-2');
+            intro.appendChild(createMultilineFragment(mensagem));
+            wrapper.appendChild(intro);
+        } else {
+            const intro = document.createElement('div');
+            intro.classList.add('mb-2');
+            intro.textContent = 'Encontrei algumas opções para você:';
+            wrapper.appendChild(intro);
+        }
 
         const list = document.createElement('ul');
         list.classList.add('chat-suggestion-list');
@@ -123,6 +132,20 @@ export function initializeChatbot() {
             texto += categoria;
 
             item.textContent = texto;
+            
+            // Se tiver linkProduto, tornar clicável
+            if (produto?.linkProduto || produto?.LinkProduto) {
+                item.style.cursor = 'pointer';
+                item.style.textDecoration = 'underline';
+                item.style.color = '#007bff';
+                item.addEventListener('click', () => {
+                    const link = produto?.linkProduto ?? produto?.LinkProduto;
+                    if (link) {
+                        window.location.href = link;
+                    }
+                });
+            }
+            
             list.appendChild(item);
         });
 
@@ -131,9 +154,61 @@ export function initializeChatbot() {
         if (produtos.length > MAX_SUGGESTIONS) {
             const note = document.createElement('small');
             note.classList.add('text-muted');
-            note.textContent = `Mostrando ${MAX_SUGGESTIONS} de ${produtos.length} itens. Ajuste os termos para refinar sua busca.`;
+            note.textContent = `Mostrando ${MAX_SUGGESTIONS} de ${produtos.length} itens.`;
             wrapper.appendChild(note);
         }
+
+        appendMessageElement(wrapper);
+    };
+
+    const appendBotProductCard = (produto, mensagem = '') => {
+        const wrapper = createMessageWrapper(false);
+
+        if (mensagem) {
+            const intro = document.createElement('div');
+            intro.classList.add('mb-2');
+            intro.appendChild(createMultilineFragment(mensagem));
+            wrapper.appendChild(intro);
+        }
+
+        const card = document.createElement('div');
+        card.classList.add('card', 'mt-2');
+        card.style.maxWidth = '300px';
+
+        if (produto?.imagemUrl || produto?.ImagemUrl) {
+            const img = document.createElement('img');
+            img.src = produto?.imagemUrl ?? produto?.ImagemUrl;
+            img.classList.add('card-img-top');
+            img.style.maxHeight = '200px';
+            img.style.objectFit = 'cover';
+            card.appendChild(img);
+        }
+
+        const cardBody = document.createElement('div');
+        cardBody.classList.add('card-body');
+
+        const title = document.createElement('h6');
+        title.classList.add('card-title');
+        title.textContent = produto?.nome ?? produto?.Nome ?? 'Produto';
+        cardBody.appendChild(title);
+
+        if (produto?.preco || produto?.Preco) {
+            const price = document.createElement('p');
+            price.classList.add('card-text');
+            price.textContent = formatCurrency(produto?.preco ?? produto?.Preco);
+            cardBody.appendChild(price);
+        }
+
+        if (produto?.linkProduto || produto?.LinkProduto) {
+            const link = document.createElement('a');
+            link.href = produto?.linkProduto ?? produto?.LinkProduto;
+            link.classList.add('btn', 'btn-primary', 'btn-sm');
+            link.textContent = 'Ver produto';
+            cardBody.appendChild(link);
+        }
+
+        card.appendChild(cardBody);
+        wrapper.appendChild(card);
 
         appendMessageElement(wrapper);
     };
@@ -141,7 +216,13 @@ export function initializeChatbot() {
     const sendMessage = async () => {
         const message = input.value.trim();
 
-        if (!message || isSendingMessage) {
+        // Caso 7: Entrada vazia - não enviar request
+        if (!message) {
+            appendBotMessage('Digite algo para que eu possa ajudar.');
+            return;
+        }
+
+        if (isSendingMessage) {
             return;
         }
 
@@ -150,12 +231,23 @@ export function initializeChatbot() {
         setLoadingState(true);
 
         try {
+            // Obter userId se disponível (pode vir de localStorage, sessionStorage, etc.)
+            const usuarioId = localStorage.getItem('usuarioId') || sessionStorage.getItem('usuarioId');
+            
+            const requestBody = {
+                mensagemUsuario: message
+            };
+            
+            if (usuarioId) {
+                requestBody.usuarioId = parseInt(usuarioId, 10);
+            }
+
             const response = await fetch(CHATBOT_API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
-                body: JSON.stringify({ mensagemUsuario: message })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
@@ -164,10 +256,27 @@ export function initializeChatbot() {
 
             const data = await response.json();
 
-            if (Array.isArray(data) && data.length > 0) {
-                appendBotSuggestions(data);
+            // Interpretar novo formato de resposta
+            if (data.tipo === 'lista' && Array.isArray(data.produtos) && data.produtos.length > 0) {
+                ultimaRecomendacaoProdutos = data.produtos.map(p => p.id);
+                appendBotSuggestions(data.produtos, data.mensagem);
+            } else if (data.tipo === 'produto' && data.produtos?.length > 0) {
+                ultimaRecomendacaoProdutos = data.produtos.map(p => p.id);
+                appendBotProductCard(data.produtos[0], data.mensagem);
+            } else if (data.tipo === 'pergunta') {
+                appendBotMessage(data.mensagem);
+                // Opcional: transformar a pergunta em botão de resposta rápida
+            } else if (data.tipo === 'texto') {
+                appendBotMessage(data.mensagem);
+            } else if (data.tipo === 'erro') {
+                appendBotMessage(`Erro: ${data.mensagem}`);
             } else {
-                appendBotMessage('Não encontrei produtos com esse perfil agora. Pode tentar com outros termos ou ser um pouco mais específico?');
+                // Fallback para formato antigo (array de produtos)
+                if (Array.isArray(data) && data.length > 0) {
+                    appendBotSuggestions(data);
+                } else {
+                    appendBotMessage('Não encontrei produtos com esse perfil agora. Pode tentar com outros termos ou ser um pouco mais específico?');
+                }
             }
         } catch (error) {
             console.error('Erro ao consultar o chatbot:', error);
@@ -192,4 +301,3 @@ export function initializeChatbot() {
 }
 
 document.addEventListener('sharedContentLoaded', initializeChatbot);
-
