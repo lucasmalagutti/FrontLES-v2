@@ -1,20 +1,35 @@
 class CarrinhoService {
     constructor() {
-        this.baseUrl = 'https://localhost:7280/api/Carrinho'; 
-        this.clienteId = this.obterClienteId();
+        this.baseUrl = 'https://localhost:7280/api/Carrinho';
+        this.clienteId = null;
     }
 
-    obterClienteId() {
-        return 33;
+    resolveClienteId() {
+        const armazenamento = localStorage.getItem('usuarioId') ?? sessionStorage.getItem('usuarioId');
+        if (armazenamento) {
+            const parsed = Number(armazenamento);
+            if (!Number.isNaN(parsed) && parsed > 0) {
+                this.clienteId = parsed;
+                return parsed;
+            }
+        }
+
+        if (this.clienteId && this.clienteId > 0) {
+            return this.clienteId;
+        }
+
+        this.clienteId = 33;
+        return this.clienteId;
     }
 
     async obterCarrinho() {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}`);
+            const response = await fetch(`${this.baseUrl}/${clienteId}`);
             if (!response.ok) {
                 throw new Error('Erro ao obter carrinho');
             }
@@ -26,12 +41,13 @@ class CarrinhoService {
     }
 
     async adicionarItem(produtoId, quantidade, precoUnitario) {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}/adicionar`, {
+            const response = await fetch(`${this.baseUrl}/${clienteId}/adicionar`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -55,18 +71,19 @@ class CarrinhoService {
     }
 
     async atualizarItem(produtoId, quantidade) {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}/atualizar`, {
+            const response = await fetch(`${this.baseUrl}/${clienteId}/atualizar`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    clienteId: this.clienteId,
+                    clienteId,
                     produtoId: produtoId,
                     quantidade: quantidade
                 })
@@ -84,12 +101,13 @@ class CarrinhoService {
     }
 
     async removerItem(produtoId) {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}/remover/${produtoId}`, {
+            const response = await fetch(`${this.baseUrl}/${clienteId}/remover/${produtoId}`, {
                 method: 'DELETE'
             });
 
@@ -105,12 +123,13 @@ class CarrinhoService {
     }
 
     async limparCarrinho() {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}/limpar`, {
+            const response = await fetch(`${this.baseUrl}/${clienteId}/limpar`, {
                 method: 'DELETE'
             });
 
@@ -126,12 +145,13 @@ class CarrinhoService {
     }
 
     async finalizarCarrinho() {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}/finalizar`, {
+            const response = await fetch(`${this.baseUrl}/${clienteId}/finalizar`, {
                 method: 'POST'
             });
 
@@ -148,12 +168,13 @@ class CarrinhoService {
 
     // Método específico para aumentar quantidade
     async adicionarQtdCarrinho(produtoId) {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}/adicionar-qtd`, {
+            const response = await fetch(`${this.baseUrl}/${clienteId}/adicionar-qtd`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -176,12 +197,13 @@ class CarrinhoService {
 
     // Método específico para diminuir quantidade
     async diminuirQtdCarrinho(produtoId) {
-        if (!this.clienteId) {
+        const clienteId = this.resolveClienteId();
+        if (!clienteId) {
             throw new Error('Cliente não logado');
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/${this.clienteId}/diminuir-qtd`, {
+            const response = await fetch(`${this.baseUrl}/${clienteId}/diminuir-qtd`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
